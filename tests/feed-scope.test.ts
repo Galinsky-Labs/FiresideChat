@@ -62,3 +62,12 @@ test("publisher transcript recovery cannot escape approved shared-feed GUID scop
  });
  assert.throws(()=>transcriptScopePredicate({...scope,status:"PENDING"}),/TRANSCRIPT_SCOPE_UNAPPROVED/);
 });
+
+test("invalid episode timestamps never qualify for ingestion or attribution",()=>{
+ const invalid={...parsed.episodes[1],publishedAt:new Date(NaN)};
+ const result=filterScopedFeed({...parsed,episodes:[invalid]},scope.feedUrl,scope);
+ assert.equal(result.state,"ALLOWED");
+ if(result.state==="ALLOWED")assert.equal(result.episodes.length,0);
+ assert.deepEqual(eligibleOfficialIds(scope,invalid),[]);
+ assert.equal(canPreserveLegacyEpisode({sourceFeedUrl:null,audioUrl:invalid.audioUrl,publishedAt:invalid.publishedAt},invalid,scope.feedUrl),false);
+});

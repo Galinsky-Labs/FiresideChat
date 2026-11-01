@@ -58,6 +58,7 @@ export function filterScopedFeed(parsed:ParsedFeed,actualUrl:string,scope:FeedSc
    return {state:"BLOCKED",reason:"FEED_IDENTITY_CHANGED"};
  const allow=scope.mode==="SHARED"?new Set(scope.episodes.map(e=>e.guid)):null;
  const eligible=parsed.episodes.filter(e=>{
+   if (!(e.publishedAt instanceof Date) || !Number.isFinite(e.publishedAt.getTime())) return false;
    if(allow&&!allow.has(e.guid))return false;
    const on=e.publishedAt.toISOString().slice(0,10);
    return scope.hosts.some(h=>on>=h.fromDay&&(!h.toDay||on<=h.toDay));
@@ -68,6 +69,7 @@ export function filterScopedFeed(parsed:ParsedFeed,actualUrl:string,scope:FeedSc
 export function eligibleOfficialIds(scope:FeedScope,episode:{guid:string;publishedAt:Date}):string[]{
  validateFeedScope(scope);if(scope.status!=="APPROVED")return [];
  if(scope.mode==="SHARED"&&!scope.episodes.some(e=>e.guid===episode.guid))return [];
+ if (!(episode.publishedAt instanceof Date) || !Number.isFinite(episode.publishedAt.getTime())) return [];
  const on=episode.publishedAt.toISOString().slice(0,10);
  return [...new Set(scope.hosts.filter(h=>on>=h.fromDay&&(!h.toDay||on<=h.toDay)).map(h=>h.officialId))].sort();
 }
@@ -78,6 +80,7 @@ export function canPreserveLegacyEpisode(previous:{
 },episode:Pick<NormalizedEpisode,"audioUrl"|"publishedAt">,approvedFeedUrl:string):boolean {
  if(!previous||!previous.publishedAt||!episode.publishedAt||!previous.audioUrl)return false;
  if(previous.sourceFeedUrl!==null&&previous.sourceFeedUrl!==approvedFeedUrl)return false;
+ if (!Number.isFinite(previous.publishedAt.getTime()) || !Number.isFinite(episode.publishedAt.getTime())) return false;
  return previous.audioUrl===episode.audioUrl &&
    previous.publishedAt.getTime()===episode.publishedAt.getTime();
 }
