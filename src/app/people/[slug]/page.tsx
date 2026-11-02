@@ -5,6 +5,7 @@ import { EpisodeCard } from "@/components/episode-card";
 import { IllustratedPortrait } from "@/components/illustrated-portrait";
 import { profileForSlug } from "@/data/person-profiles";
 import { db } from "@/lib/db";
+import { reviewedEpisodeWhere } from "@/lib/feed-scope-store";
 import { officeLabel } from "@/lib/presentation";
 
 export const dynamic = "force-dynamic";
@@ -38,14 +39,7 @@ export default async function PersonPage({ params }: Props) {
     include: {
       podcasts: {
         include: {
-          podcast: {
-            include: {
-              episodes: {
-                orderBy: { publishedAt: "desc" },
-                take: 30,
-              },
-            },
-          },
+          podcast: true,
         },
       },
     },
@@ -54,6 +48,13 @@ export default async function PersonPage({ params }: Props) {
   if (!person) notFound();
 
   const profile = profileForSlug(person.slug);
+  const scopedEpisodes=await Promise.all(person.podcasts.map(async ({podcast})=>{
+    const reviewed=await reviewedEpisodeWhere(podcast.id,person.id);
+    return {podcast, episodes:await db.episode.findMany({
+      where:{podcastId:podcast.id,...reviewed},
+      orderBy:{publishedAt:"desc"},take:30,
+    })};
+  }));
 
   return (
     <div className="detail-page">
@@ -175,8 +176,8 @@ export default async function PersonPage({ params }: Props) {
           </div>
         </div>
         <div className="episode-list">
-          {person.podcasts.flatMap(({ podcast }) =>
-            podcast.episodes.map((episode) => (
+          {scopedEpisodes.flatMap(({ podcast, episodes }) =>
+            episodes.map((episode) => (
               <EpisodeCard
                 key={episode.id}
                 episode={episode}

@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { loadFeedScope } from "@/lib/feed-scope-store";
+import { filterScopedFeed, canPreserveLegacyEpisode, transcriptScopePredicate, type FeedScope } from "@/lib/feed-scope";
 import { fetchFeed } from "./fetch-feed";
 import { parseFeed } from "./parse-feed";
 import { fetchPublisherTranscript } from "./publisher-transcript";
@@ -45,11 +47,12 @@ function episodeData(episode: NormalizedEpisode) {
   };
 }
 
-async function ingestPublisherTranscripts(podcastId: string) {
+async function ingestPublisherTranscripts(podcastId: string, scope?: FeedScope) {
   const limit = envPositiveInteger("PUBLISHER_TRANSCRIPTS_PER_RUN") ?? 20;
   const episodes = await db.episode.findMany({
     where: {
       podcastId,
+      ...(scope?transcriptScopePredicate(scope):{}),
       publisherTranscriptUrl: { not: null },
       OR: [
         { transcriptStatus: { not: "COMPLETE" } },
@@ -151,6 +154,13 @@ export async function ingestPodcastBySlug(
     };
   }
 
+  // A configured ambiguous/changed feed must be explicitly approved, even when force=true.
+  const feedScope = await loadFeedScope(podcast.id, podcast.rssUrl);
+  if (feedScope && feedScope.status !== "APPROVED") {
+    return {podcastSlug,status:"skipped",episodesSeen:0,episodesCreated:0,episodesUpdated:0,
+      episodesSkipped:0,message:"Feed source review not approved"};
+  }
+
   const now = new Date();
   if (
     !options.force &&
@@ -187,7 +197,8 @@ export async function ingestPodcastBySlug(
     });
 
     if (fetched.status === "not-modified") {
-      await ingestPublisherTranscripts(podcast.id);
+      if (feedScope && fetched.finalUrl !== feedScope.feedUrl) throw new Error("FEED_IDENTITY_CHANGED");
+      await ingestPublisherTranscripts(podcast.id,feedScope??undefined);
 
       await db.$transaction([
         db.podcast.update({
@@ -224,7 +235,11 @@ export async function ingestPodcastBySlug(
       };
     }
 
-    const parsed = parseFeed(fetched.xml);
+    const raw = parseFeed(fetched.xml);
+    const scopeResult = feedScope ? filterScopedFeed(raw, fetched.finalUrl, feedScope) : null;
+    if (scopeResult?.state === "BLOCKED") throw new Error(scopeResult.reason);
+    const parsed = scopeResult?.state === "ALLOWED" ? {...raw, episodes:scopeResult.episodes,
+      skippedItems:raw.skippedItems+scopeResult.skipped} : raw;
     const guids = parsed.episodes.map((episode) => episode.guid);
     const existing =
       guids.length === 0
@@ -234,8 +249,16 @@ export async function ingestPodcastBySlug(
               podcastId: podcast.id,
               guid: { in: guids },
             },
-            select: { guid: true },
+            select: { guid: true, audioUrl: true, publishedAt: true, sourceFeedUrl: true },
           });
+    if (feedScope) {
+      const byGuid=new Map(existing.map(row=>[row.guid,row]));
+      for (const episode of parsed.episodes) {
+        const previous=byGuid.get(episode.guid);
+        if (previous && !canPreserveLegacyEpisode(previous,episode,feedScope.feedUrl))
+          throw new Error("FEED_GUID_PROVENANCE_CONFLICT");
+      }
+    }
     const existingGuids = new Set(existing.map((episode) => episode.guid));
 
     for (const batch of chunks(parsed.episodes, UPSERT_BATCH_SIZE)) {
@@ -254,10 +277,12 @@ export async function ingestPodcastBySlug(
             create: {
               podcastId: podcast.id,
               guid: episode.guid,
+              ...(feedScope?{sourceFeedUrl:feedScope.feedUrl}:{}),
               transcriptStatus: episode.publisherTranscript ? "AVAILABLE" : "MISSING",
               ...episodeData(episode),
             },
-            update: episodeData(episode),
+            update: {...episodeData(episode),
+              ...(feedScope?{sourceFeedUrl:feedScope.feedUrl}:{})},
           }),
         ),
       );
@@ -277,7 +302,7 @@ export async function ingestPodcastBySlug(
       });
     }
 
-    await ingestPublisherTranscripts(podcast.id);
+    await ingestPublisherTranscripts(podcast.id,feedScope??undefined);
 
     const episodesCreated = parsed.episodes.filter(
       (episode) => !existingGuids.has(episode.guid),

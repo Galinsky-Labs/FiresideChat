@@ -5,6 +5,7 @@ import { IllustratedPortrait } from "@/components/illustrated-portrait";
 import { PlayButton } from "@/components/player/play-button";
 import { TranscriptSegments } from "@/components/transcript-segments";
 import { db } from "@/lib/db";
+import { reviewedEpisodeWhere, feedAttributionForPodcast } from "@/lib/feed-scope-store";
 import { formatDate, formatDuration, officeLabel } from "@/lib/presentation";
 import { portraitUrlForSlug } from "@/lib/portraits";
 
@@ -21,15 +22,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     select: {
       title: true,
       description: true,
+      podcastId: true,
       podcast: { select: { title: true } },
     },
   });
 
+  const visible=episode && (await db.episode.count({
+    where:{id,...await reviewedEpisodeWhere(episode.podcastId)},
+  }))===1;
   return {
-    title: episode?.title ?? "Episode",
-    description:
+    title: visible ? episode?.title ?? "Episode" : "Episode",
+    description: visible ? (
       episode?.description ??
-      (episode ? `Listen to ${episode.title} from ${episode.podcast.title}.` : undefined),
+      (episode ? `Listen to ${episode.title} from ${episode.podcast.title}.` : undefined)
+    ) : undefined,
   };
 }
 
@@ -52,8 +58,13 @@ export default async function EpisodePage({ params }: Props) {
   });
 
   if (!episode) notFound();
+  if ((await db.episode.count({where:{id:episode.id,
+      ...await reviewedEpisodeWhere(episode.podcastId)}}))!==1) notFound();
 
-  const person = episode.podcast.people[0]?.person;
+  const attribution=await feedAttributionForPodcast(episode.podcastId);
+  const person=attribution
+    ? await db.person.findFirst({where:{id:{in:attribution(episode)}},orderBy:{id:"asc"}})
+    : episode.podcast.people[0]?.person;
   if (!person) notFound();
 
   const duration = formatDuration(episode.durationSeconds);
