@@ -224,3 +224,91 @@ model PodcastProductionInquiry {
   @@index([contactEmailHash, submittedAt])
   @@index([emailStatus, emailLastAttemptAt])
 }
+
+enum HostReviewRole {
+  HOST
+  COHOST
+  OFFICIAL_PRODUCER
+  GUEST
+  UNKNOWN
+}
+
+enum HostReviewEvidenceKind {
+  HOST_CREDIT
+  COHOST_CREDIT
+  OFFICIAL_PRODUCTION
+  NETWORK_ONLY
+  GUEST_APPEARANCE
+  OTHER
+}
+
+enum HostReviewStatus {
+  PENDING
+  NEEDS_EVIDENCE
+  VERIFIED
+  EXCLUDED_GUEST
+  REJECTED
+}
+
+enum HostReviewAction {
+  SUBMITTED
+  EVIDENCE_ADDED
+  CLAIM_AMENDED
+  VERIFIED
+  EXCLUDED_GUEST
+  NEEDS_EVIDENCE
+  REJECTED
+}
+
+model HostReviewCandidate {
+  id                String                @id @default(cuid())
+  identityKey       String                @unique
+  officialKey       String
+  officialName      String
+  identitySourceUrl String
+  showKey           String
+  showTitle         String
+  proposedRole      HostReviewRole
+  feedCandidateUrl  String?
+  hostStartOn       DateTime?             @db.Date
+  hostEndOn         DateTime?             @db.Date
+  status            HostReviewStatus      @default(PENDING)
+  revision          Int                   @default(0)
+  reviewNote        String?
+  reviewerRef       String?
+  reviewedAt        DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  evidence          HostReviewEvidence[]
+  audit             HostReviewAudit[]
+
+  @@index([status, createdAt])
+  @@index([officialKey, showKey])
+}
+
+model HostReviewEvidence {
+  id          String                 @id @default(cuid())
+  candidateId String
+  kind        HostReviewEvidenceKind
+  sourceUrl   String
+  excerpt     String
+  observedOn  DateTime               @db.Date
+  createdAt   DateTime               @default(now())
+  candidate   HostReviewCandidate    @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+
+  @@unique([candidateId, kind, sourceUrl, observedOn])
+  @@index([candidateId, createdAt])
+}
+
+model HostReviewAudit {
+  id          String              @id @default(cuid())
+  candidateId String
+  action      HostReviewAction
+  revision    Int
+  actorRef    String
+  note        String
+  createdAt   DateTime            @default(now())
+  candidate   HostReviewCandidate @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+
+  @@unique([candidateId, revision])
+}

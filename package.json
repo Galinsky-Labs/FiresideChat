@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/feeds/*.test.ts src/lib/transcription/*.test.ts src/lib/admin-auth.test.ts src/lib/operational-health.test.ts src/lib/homepage-selection.test.ts src/lib/portraits.test.ts src/components/player/*.test.ts src/data/person-profiles.test.ts",
+    "test": "tsx --test src/lib/feeds/*.test.ts src/lib/transcription/*.test.ts src/lib/admin-auth.test.ts src/lib/operational-health.test.ts src/lib/homepage-selection.test.ts src/lib/portraits.test.ts src/components/player/*.test.ts src/data/person-profiles.test.ts tests/production-verification.test.ts tests/host-review.test.ts tests/host-review-db.test.ts tests/host-review-batch.test.ts tests/host-review-request.test.ts",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
@@ -31,7 +31,8 @@
     "pretranscribe:missing": "npm run prisma:generate",
     "sync:archive": "tsx scripts/sync-archive.ts",
     "archive:status": "tsx scripts/archive-status.ts",
-    "prearchive:status": "npm run prisma:generate"
+    "prearchive:status": "npm run prisma:generate",
+    "host-review:batch": "tsx scripts/stage-host-review-batch.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
