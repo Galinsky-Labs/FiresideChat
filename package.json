@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/feeds/*.test.ts src/lib/transcription/*.test.ts src/lib/admin-auth.test.ts src/lib/operational-health.test.ts src/lib/homepage-selection.test.ts src/lib/portraits.test.ts src/components/player/*.test.ts src/data/person-profiles.test.ts tests/priority-catalog-review.test.ts tests/priority-review-queue.test.ts",
+    "test": "tsx --test src/lib/feeds/*.test.ts src/lib/transcription/*.test.ts src/lib/admin-auth.test.ts src/lib/operational-health.test.ts src/lib/homepage-selection.test.ts src/lib/portraits.test.ts src/components/player/*.test.ts src/data/person-profiles.test.ts tests/priority-catalog-review.test.ts tests/priority-review-queue.test.ts && npm run test:priority-directory",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
@@ -31,7 +31,8 @@
     "pretranscribe:missing": "npm run prisma:generate",
     "sync:archive": "tsx scripts/sync-archive.ts",
     "archive:status": "tsx scripts/archive-status.ts",
-    "prearchive:status": "npm run prisma:generate"
+    "prearchive:status": "npm run prisma:generate",
+    "test:priority-directory": "python3 -m unittest discover -s tests -p 'test_priority_feed_review.py' -v"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
