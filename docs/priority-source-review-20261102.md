@@ -17,7 +17,7 @@ The Congress.gov Ron Paul and Hillary Clinton member-page fetches returned `Fail
 
 ## Executable directory boundary
 
-The actual priority directory lookup now invokes its strict classifier before exposing feed/directory URLs, bounds the JSON response to 1 MiB and accepts only exact integer track IDs. Explicit ports, control/whitespace/backslash forms and empty query/fragment delimiters are rejected as unsafe metadata. No source is auto-verified or imported. Four Python classifier tests and syntax compilation pass locally; hosted full CI remains separate.
+The actual priority directory lookup now invokes its strict classifier before exposing feed/directory URLs, bounds the JSON response to 1 MiB and accepts only exact integer track IDs. Explicit ports, control/whitespace/backslash forms and empty query/fragment delimiters are rejected as unsafe metadata. No source is auto-verified or imported. Five Python classifier/actual lookup tests and syntax compilation pass locally; hosted full CI remains separate.
 
 ## Remaining work
 

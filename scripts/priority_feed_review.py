@@ -7,7 +7,7 @@ def valid_https_url(value):
     try:
         u=urlsplit(value)
         return (u.scheme=="https" and bool(u.hostname) and u.username is None and u.password is None
-                and u.port is None and not u.fragment and not u.query and u.geturl()==value)
+                and u.port is None and u.netloc == u.hostname and not u.fragment and not u.query and u.geturl()==value)
     except ValueError:
         return False
 
