@@ -34,3 +34,9 @@ An opt-in ephemeral PostgreSQL integration test exercises transaction revisions,
 For a source-backed officeholder/show candidate inventory, use `npm run host-review:batch -- --dry-run file.jsonl` first. Each JSONL row follows the NewHostCandidateForm field names. This checks up to 1,000 rows / 2 MB and rejects duplicate identity+show+start keys before any database write. It does **not** discover real shows or verify hosts.
 
 An operator may explicitly stage valid leads as **PENDING only** using `HOST_REVIEW_BATCH_APPLY=yes npm run host-review:batch -- --apply file.jsonl` with an already authorized DATABASE_URL, outside CI. Duplicate existing candidates are left unchanged; any nonduplicate failure stops the bounded run for investigation. No private feed is fetched, podcast is published or official role approved. The audit labels these submissions as a CLI import rather than falsely attributing them to a web admin session.
+
+### Measured form admission
+
+The route authenticates the administrator and checks same origin before reading any form. Its shared request parser measures the actual stream: at most 16 KiB, 4,096 chunks and five seconds total. Content-Length is only an early rejection hint and, when supplied, must be valid and match the captured bytes. Missing or misleading lengths cannot bypass the byte limit. Cancellation, stalled streams, late timer delivery, malformed form data, uploaded files, duplicate field names and more than 24 fields fail closed before any store call. Both existing URL-encoded and multipart text forms are supported. Parser errors return a fixed no-store response without body text or provider diagnostics.
+
+`tests/host-review-request.test.ts` is included in `npm test`. Focused native Request/ReadableStream tests exercise the wire-size, chunk, cancellation, duplicate and content-type boundaries. This does not establish live proxy/HTTP ingress limits or authenticated deployed behavior.

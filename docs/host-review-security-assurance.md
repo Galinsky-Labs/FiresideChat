@@ -31,3 +31,9 @@ Scope: `HostReviewCandidate`, `HostReviewEvidence`, `HostReviewAudit`, `src/lib/
 * The queue has no connection to the full BioGuide census denominator, no automatic publisher lookup and no production verified-feed import. Those separate work units remain outstanding; no completeness claims are warranted here.
 * Existing deployment / production migrations, private admin access, live source review, restore readiness and replay tests are unverified until independently observed. CI tests run against a disposable PostgreSQL service, not production.
 * Verify the exact head SHA, database migration, `npm test`, lint, typecheck, build and the repository's public smoke check before marking this implementation ready; observe GitHub merge gates separately from green tests.
+
+## Measured request-body repair
+
+Source review found that the previous route checked only the declared Content-Length before `formData()`, so an omitted or misleading header did not bound parsing. The route now calls a bounded stream reader only after authentication/origin admission. Actual bytes and chunks, a monotonic total deadline and cancellation gate form decoding; copied bytes prevent a stream producer from changing captured data. Duplicate names, file fields, unsupported media types and excess fields are denied. Error output is fixed and private/no-store. Existing domain validation, store transactions and revision/audit controls are unchanged.
+
+Five focused native request-stream groups pass (valid text forms; missing/misleading size; duplicate/file/field/media rejection; cancellation/stall; chunk flooding and delayed timer delivery). Hosted lint/typecheck/build, the expanded npm test suite and exact-head PR checks remain required. No live admin session, production migration or editorial verification is claimed.
