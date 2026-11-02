@@ -54,7 +54,9 @@ export function parseEpisodeEvidence(input:Record<string,unknown>) {
  const guid=text(input.guid,1,1024);
  return {guid,sourceUrl:reviewHttps(input.sourceUrl),observedOn:reviewDate(input.observedOn)};
 }
-export function parseReviewDecision(input:Record<string,unknown>) {
+export function parseReviewDecision(input:Record<string,unknown>): {
+ decision:"APPROVED"|"REJECTED";reviewSourceUrl:string;reviewNote:string;reviewedOn:string;
+} {
  const decision=input.decision;
  if(decision!=="APPROVED"&&decision!=="REJECTED")return fail("INVALID_REVIEW_DECISION");
  return {decision,reviewSourceUrl:reviewHttps(input.reviewSourceUrl),
