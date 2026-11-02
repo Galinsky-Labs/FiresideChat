@@ -11,7 +11,8 @@ test('bounded URL-encoded and multipart forms support existing text-only submiss
  assert.deepEqual({...await readHostReviewForm(new Request(url,{method:'POST',body:form}))},{action:'amend',revision:'1'});
 });
 test('measured stream budget rejects missing or misleading content length',async()=>{
- for(const headers of [{},{'content-length':'1'},{'content-length':'16385'}])
+ const declarations: Record<string,string>[] = [{},{'content-length':'1'},{'content-length':'16385'}];
+ for(const headers of declarations)
   await rejected(()=>readHostReviewForm(request('x='.padEnd(16385,'a'),headers)),413);
  for(const length of ['-1','garbage','9007199254740992']) await rejected(()=>readHostReviewForm(request('x=1',{'content-length':length})),400);
  await rejected(()=>readHostReviewForm(request('x=1',{'content-length':'2'})),400);
