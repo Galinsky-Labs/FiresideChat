@@ -30,3 +30,12 @@ export function youtubeEmbedUrl(video: VideoSource): string | null {
   const id = validateVideoSource(video);
   return "https://www.youtube-nocookie.com/embed/" + id;
 }
+
+/** Instagram's public embed surface. Never proxy or download original videos. */
+export function instagramEmbedUrl(video: VideoSource): string | null {
+  if (video.platform !== "INSTAGRAM") return null;
+  const id = validateVideoSource(video);
+  const url = new URL(video.sourceUrl);
+  const kind = url.pathname.split("/")[1];
+  return "https://www.instagram.com/" + kind + "/" + id + "/embed/";
+}
