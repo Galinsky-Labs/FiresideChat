@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { youtubeEmbedUrl } from "@/lib/video-sources";
+import { instagramEmbedUrl, youtubeEmbedUrl } from "@/lib/video-sources";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +9,8 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const video = await db.videoChat.findFirst({ where: { id, active: true }, include: { person: true } });
   if (!video) notFound();
-  // Embed only an authenticated YouTube identifier; all other platforms link
-  // to the publisher, with no scraping, proxying, or copyrighted rehosting.
-  const embed = youtubeEmbedUrl(video);
+  // Embed official publisher links only; do not scrape or rehost media.
+  const embed = youtubeEmbedUrl(video) ?? instagramEmbedUrl(video);
   return (
     <div className="detail-page">
       <section className="search-hero">
