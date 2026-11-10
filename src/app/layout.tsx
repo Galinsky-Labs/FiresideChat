@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | Fireside Chat",
   },
   description:
-    "One searchable archive for podcasts hosted by current and former members of Congress and U.S. presidents.",
+    "A searchable archive for podcasts, personal chats and livestreams hosted by current and former members of Congress and U.S. presidents.",
 };
 
 export default function RootLayout({
@@ -32,6 +32,7 @@ export default function RootLayout({
               <nav className="site-nav" aria-label="Primary navigation">
                 <Link href="/#shows">Shows</Link>
                 <Link href="/episodes">Episodes</Link>
+                <Link href="/videos">Videos</Link>
                 <Link href="/people">People</Link>
                 <Link href="/search">Search</Link>
                 <Link href="/podcast-production">Production services</Link>
