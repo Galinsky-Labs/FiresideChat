@@ -1,6 +1,6 @@
 # Fireside Chat
 
-Fireside Chat is a nonpartisan podcast player and searchable archive for podcasts hosted, co-hosted, or officially produced by current and former members of the U.S. Congress and U.S. presidents.
+Fireside Chat is a nonpartisan archive for podcasts **and verified direct-to-audience video conversations** by current and former members of the U.S. Congress and U.S. presidents. Personal chats, livestreams, Q&As and behind-the-scenes videos are catalogued alongside podcasts without treating them as RSS audio episodes.
 
 The product is organized around public servants rather than shows. A person may host multiple podcasts over time, while their Fireside Chat page remains the durable home for episodes, transcripts, accomplishments, and eventually official contact information.
 
@@ -57,6 +57,14 @@ The crawl verifies the homepage, People directory, a seeded person page, a seede
 ## Verified podcast registry
 
 The curated registry lives in `src/data/podcast-registry.ts`. Every ingestable show carries a canonical RSS URL, a verified host relationship, provenance, and a verification date. See `docs/podcast-registry.md` for the inclusion and review policy.
+
+## Video conversations
+
+The curated `src/data/video-registry.ts` lists individually verified videos with canonical original-publisher links, platform-specific IDs, publication dates, format, and provenance. The `prisma/seed.ts` process idempotently inserts these records after seeding their public-servant identities. Run `npm run db:deploy && npm run db:seed` to apply the VideoChat migration and ingest the curated entries.
+
+Visit `/videos` to filter by Personal Chat, Livestream, Q&A, and Behind the Scenes. Video entries appear on the homepage, their host's person page, and in site search (including any authorized transcript text entered in the database). YouTube originals have privacy-conscious embedded playback plus a link to the publisher; other platforms link directly to the original.
+
+Only verify content from the original official/publisher-controlled account. Do not add third-party news clips, guest appearances, campaign ads, or deleted Instagram live videos without a verifiable original permalink. The registry is deliberately curated; automatic social-platform crawling and bulk imports are not implemented, and the platform's terms must be respected. The AOC seed entry is a verified behind-the-scenes video, not a claim that her Instagram livestream archive has been recovered.
 
 ## Feed ingestion
 
