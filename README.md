@@ -66,6 +66,12 @@ Visit `/videos` to filter by Personal Chat, Livestream, Q&A, and Behind the Scen
 
 Only verify content from the original official/publisher-controlled account. Do not add third-party news clips, guest appearances, campaign ads, or deleted Instagram live videos without a verifiable original permalink. The registry is deliberately curated; automatic social-platform crawling and bulk imports are not implemented, and the platform's terms must be respected. The AOC seed entry is a verified behind-the-scenes video, not a claim that her Instagram livestream archive has been recovered.
 
+## Instagram integration
+
+Verified Instagram professional-account videos and Reels can be discovered through Meta's authorized Business Discovery API, without scraping or rehosting. Media is staged for editorial review before appearing publicly. The initial configured source is `@aoc`; no access token or Meta App permissions are bundled with the repository.
+
+See [Instagram setup and review instructions](docs/instagram-integration.md). Operators configure credentials, run `npm run ingest:instagram` and then `npm run review:instagram -- list`; reviewed videos can be approved or rejected with the review command. Setting `INSTAGRAM_SYNC_ENABLED=true` enables discovery during `npm run sync:archive`. Archived/deleted Live streams are not automatically recoverable.
+
 ## Feed ingestion
 
 `npm run ingest:feeds` fetches all active, due feeds and idempotently inserts or updates their episodes. It supports conditional HTTP requests, RSS 2.0 and Atom, bounded concurrency, per-feed run records, failure isolation, and retry backoff. See `docs/rss-ingestion.md` for commands and operational details.
