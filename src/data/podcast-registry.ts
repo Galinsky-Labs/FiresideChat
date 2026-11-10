@@ -37,6 +37,14 @@ export const podcastRegistry: {
 } = {
   people: [
     {
+      slug: "alexandria-ocasio-cortez",
+      fullName: "Alexandria Ocasio-Cortez",
+      kind: "HOUSE",
+      state: "NY",
+      party: "Democratic",
+      isCurrent: true,
+    },
+    {
       slug: "ed-markey",
       fullName: "Ed Markey",
       kind: "SENATE",

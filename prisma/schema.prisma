@@ -7,6 +7,19 @@ datasource db {
   provider = "postgresql"
 }
 
+enum VideoFormat {
+  PERSONAL_CHAT
+  LIVESTREAM
+  Q_AND_A
+  BEHIND_THE_SCENES
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  INSTAGRAM
+  OTHER
+}
+
 enum PersonKind {
   HOUSE
   SENATE
@@ -61,6 +74,7 @@ model Person {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   podcasts     PodcastPerson[]
+  videos       VideoChat[]
 
   @@index([isCurrent])
   @@index([kind])
@@ -223,4 +237,29 @@ model PodcastProductionInquiry {
   @@index([clientHash, submittedAt])
   @@index([contactEmailHash, submittedAt])
   @@index([emailStatus, emailLastAttemptAt])
+}
+
+model VideoChat {
+  id                String        @id @default(cuid())
+  personId          String
+  person            Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  title             String
+  description       String?
+  platform          VideoPlatform
+  format            VideoFormat
+  platformVideoId   String
+  sourceUrl         String        @unique
+  verificationUrl   String
+  verificationNote  String
+  verifiedAt        DateTime
+  publisherName     String
+  publishedAt       DateTime
+  transcriptText    String?
+  active            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([platform, platformVideoId])
+  @@index([personId, publishedAt])
+  @@index([active, publishedAt])
 }

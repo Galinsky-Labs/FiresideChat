@@ -1,4 +1,5 @@
 import { podcastRegistry } from "../src/data/podcast-registry";
+import { verifiedVideos, validateVideoRegistry } from "../src/data/video-registry";
 
 function assertUnique(values: string[], label: string) {
   const seen = new Set<string>();
@@ -58,6 +59,12 @@ for (const podcast of podcastRegistry.podcasts) {
   }
 }
 
+validateVideoRegistry(verifiedVideos);
+for (const video of verifiedVideos) {
+  if (!peopleBySlug.has(video.personSlug)) {
+    throw new Error("Video references unknown public servant " + video.personSlug);
+  }
+}
 console.log(
-  `Registry valid: ${podcastRegistry.people.length} people, ${podcastRegistry.podcasts.length} ingestable podcasts, ${podcastRegistry.candidates.length} candidates.`,
+  `Registry valid: ${podcastRegistry.people.length} people, ${podcastRegistry.podcasts.length} ingestable podcasts, ${podcastRegistry.candidates.length} candidates, ${verifiedVideos.length} verified videos.`,
 );

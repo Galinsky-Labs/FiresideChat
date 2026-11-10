@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/feeds/*.test.ts src/lib/transcription/*.test.ts src/lib/admin-auth.test.ts src/lib/operational-health.test.ts src/lib/homepage-selection.test.ts src/lib/portraits.test.ts src/components/player/*.test.ts src/data/person-profiles.test.ts",
+    "test": "tsx --test src/lib/feeds/*.test.ts src/lib/transcription/*.test.ts src/lib/admin-auth.test.ts src/lib/operational-health.test.ts src/lib/homepage-selection.test.ts src/lib/portraits.test.ts src/lib/video-sources.test.ts src/components/player/*.test.ts src/data/person-profiles.test.ts",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

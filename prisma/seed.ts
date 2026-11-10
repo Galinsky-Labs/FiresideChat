@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { podcastRegistry } from "../src/data/podcast-registry";
+import { verifiedVideos, validateVideoRegistry } from "../src/data/video-registry";
 
 const localDatabaseUrl =
   "postgresql://postgres:postgres@localhost:5432/fireside_chat?schema=public";
@@ -62,6 +63,26 @@ async function main() {
           role: relationship.role,
         };
       }),
+    });
+  }
+
+  validateVideoRegistry(verifiedVideos);
+  for (const video of verifiedVideos) {
+    const { personSlug, verifiedAt, publishedAt, ...data } = video;
+    const personId = personIds.get(personSlug);
+    if (!personId) throw new Error("Missing video publisher identity: " + personSlug);
+    await prisma.videoChat.upsert({
+      where: { platform_platformVideoId: { platform: video.platform, platformVideoId: video.platformVideoId } },
+      create: {
+        ...data, personId,
+        verifiedAt: new Date(verifiedAt + "T00:00:00Z"),
+        publishedAt: new Date(publishedAt),
+      },
+      update: {
+        ...data, personId,
+        verifiedAt: new Date(verifiedAt + "T00:00:00Z"),
+        publishedAt: new Date(publishedAt),
+      },
     });
   }
 
