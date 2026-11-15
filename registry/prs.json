@@ -336,13 +336,15 @@
       "id": "FC-P14",
       "title": "Transcript integrity, correction and timestamp QA",
       "origin": "addition",
-      "prs": [],
-      "contributingPrs": [
-        64
+      "prs": [
+        64,
+        71
       ],
+      "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P15",

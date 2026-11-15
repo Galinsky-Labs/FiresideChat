@@ -5,7 +5,7 @@
 ## Update — 2026-11-15 (Galinsky-Labs/FiresideChat)
 
 - Repository now lives at `Galinsky-Labs/FiresideChat`; `registry/prs.json` identity fixed (#63).
-- Merged: FC-P04 (#55), FC-P05 (#56), FC-P08 (#57), FC-P06 partial (#58, no candidate verified — needs primary-source research), FC-P01 (#52), FC-P11 + FC-P14 partial (#64, editor correction workflow still missing), FC-P12 + FC-P13 (#65), FC-P15 (#66), FC-P17 (#68), FC-P20 tooling only (#69). #51 (CircleCI port) closed.
+- Merged: FC-P04 (#55), FC-P05 (#56), FC-P08 (#57), FC-P06 partial (#58, no candidate verified — needs primary-source research), FC-P01 (#52), FC-P11 + FC-P14 QA (#64), FC-P14 corrections workflow (#71), FC-P12 + FC-P13 (#65), FC-P15 (#66), FC-P17 (#68), FC-P20 tooling only (#69). #51 (CircleCI port) closed.
 - Deployed: Render free web service `firesidechat` (https://firesidechat.onrender.com, `srv-dbsvnk5ckfvc73cc5j5g`) on Neon project `firesidechat`. Fresh database: migrations + seed applied (61 people, 59 podcasts); feeds import and publisher transcripts recover through the free best-effort worker. The October figures below describe the old preview database, not this one.
 - `fireside-chat-preview.onrender.com` is outside this Render account and is no longer woken by CI.
 - Paid speech-to-text stays off (`TRANSCRIPTION_ENABLED=false`, no `OPENAI_API_KEY`).
