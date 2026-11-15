@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeCard } from "@/components/episode-card";
 import { db } from "@/lib/db";
+import { archiveVisibleWhere } from "@/lib/feed-scope-store";
 
 export const dynamic = "force-dynamic";
 
@@ -24,14 +25,14 @@ export default async function EpisodesPage({ searchParams }: Props) {
   const pageNumber =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
-  const totalEpisodes = await db.episode.count({
-    where: { podcast: { active: true } },
-  });
+  const visible=await archiveVisibleWhere();
+  const where={AND:[{podcast:{active:true}},visible]};
+  const totalEpisodes = await db.episode.count({where});
   const totalPages = Math.max(1, Math.ceil(totalEpisodes / PAGE_SIZE));
   if (pageNumber > totalPages && totalEpisodes > 0) notFound();
 
   const episodes = await db.episode.findMany({
-    where: { podcast: { active: true } },
+    where,
     orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
     skip: (pageNumber - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
