@@ -132,10 +132,7 @@ model PodcastPerson {
 model Episode {
   id                               String           @id @default(cuid())
   podcastId                        String
-<<<<<<< HEAD
   sourceFeedUrl                    String?
-=======
->>>>>>> origin/main
   guid                             String
   title                            String
   description                      String?
@@ -244,7 +241,6 @@ model PodcastProductionInquiry {
   @@index([emailStatus, emailLastAttemptAt])
 }
 
-<<<<<<< HEAD
 enum FeedScopeMode {
   DEDICATED
   SHARED
@@ -328,8 +324,6 @@ model FeedScopeAudit {
   @@unique([scopeId, revision])
 }
 
-=======
->>>>>>> origin/main
 enum HostReviewRole {
   HOST
   COHOST
