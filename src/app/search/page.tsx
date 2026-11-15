@@ -6,11 +6,12 @@ import { db } from "@/lib/db";
 import { feedAttributionForPodcast } from "@/lib/feed-scope-store";
 import { archiveVisibleWhere } from "@/lib/feed-scope-store";
 import { officeLabel } from "@/lib/presentation";
+import { highlightParts, parseSearchFilters, searchHref, searchTranscriptSegments, SEARCH_PAGE_SIZE } from "@/lib/archive-search";
 
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 };
 
 function transcriptClock(seconds: number) {
@@ -35,8 +36,8 @@ function excerptAround(text: string, query: string, maxLength = 240) {
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q: rawQuery } = await searchParams;
-  const q = rawQuery?.trim() ?? "";
+  const filters = parseSearchFilters(await searchParams);
+  const q = filters.q;
 
   if (q.length < 2) {
     return (
@@ -63,6 +64,9 @@ export default async function SearchPage({ searchParams }: Props) {
   }
 
   const publicEpisodeWhere=await archiveVisibleWhere();
+  // FC-P15: ranked full-text search over every timestamped segment; visibility
+  // (approved feed scope) is enforced again when the rows are loaded.
+  const segmentSearch = await searchTranscriptSegments(filters);
   const [people, podcasts, episodes, transcriptSegments, plainTranscripts, videos] =
     await Promise.all([
     db.person.findMany({
@@ -95,7 +99,7 @@ export default async function SearchPage({ searchParams }: Props) {
       take: 40,
     }),
     db.transcriptSegment.findMany({
-      where: { text: { contains: q, mode: "insensitive" },
+      where: { id: { in: segmentSearch.ids },
         transcript: { is: { episode: { is: publicEpisodeWhere } } } },
       include: {
         transcript: {
@@ -161,11 +165,9 @@ export default async function SearchPage({ searchParams }: Props) {
     return scoped(episode).map(id=>byPerson.get(id)).find(p=>p);
   };
 
-  transcriptSegments.sort(
-    (a, b) =>
-      b.transcript.episode.publishedAt.getTime() -
-      a.transcript.episode.publishedAt.getTime(),
-  );
+  const rankOrder = new Map(segmentSearch.ids.map((id, index) => [id, index]));
+  transcriptSegments.sort((a, b) => (rankOrder.get(a.id) ?? 0) - (rankOrder.get(b.id) ?? 0));
+  const totalPages = Math.max(1, Math.ceil(segmentSearch.total / SEARCH_PAGE_SIZE));
 
   return (
     <div className="detail-page">
@@ -240,13 +242,38 @@ export default async function SearchPage({ searchParams }: Props) {
         <div className="section-heading">
           <div>
             <p className="section-label">Inside the transcripts</p>
-            <h2>{transcriptSegments.length + plainTranscripts.length} matches</h2>
+            <h2>{segmentSearch.total + plainTranscripts.length} matches</h2>
           </div>
           <p className="section-explainer">
             Jump straight to the part of the conversation where your search
-            term appears.
+            term appears. Use quotes for an exact phrase.
           </p>
         </div>
+
+        <form className="search-filters" action="/search" aria-label="Filter transcript matches">
+          <input type="hidden" name="q" value={q} />
+          <label>Office
+            <select name="office" defaultValue={filters.office ?? ""}>
+              <option value="">Any</option>
+              <option value="HOUSE">House</option>
+              <option value="SENATE">Senate</option>
+              <option value="PRESIDENT">President</option>
+              <option value="SHADOW_SENATE">D.C. shadow senator</option>
+            </select>
+          </label>
+          <label>Transcript
+            <select name="source" defaultValue={filters.source ?? ""}>
+              <option value="">Any source</option>
+              <option value="PUBLISHER">Publisher-supplied</option>
+              <option value="GENERATED">Automatically generated</option>
+            </select>
+          </label>
+          <label>From year <input name="from" inputMode="numeric" pattern="[0-9]{4}" size={4} defaultValue={filters.yearFrom ?? ""} /></label>
+          <label>To year <input name="to" inputMode="numeric" pattern="[0-9]{4}" size={4} defaultValue={filters.yearTo ?? ""} /></label>
+          {filters.person ? <input type="hidden" name="person" value={filters.person} /> : null}
+          {filters.show ? <input type="hidden" name="show" value={filters.show} /> : null}
+          <button type="submit">Apply</button>
+        </form>
 
         {transcriptSegments.length + plainTranscripts.length > 0 ? (
           <div className="transcript-search-results">
@@ -267,7 +294,8 @@ export default async function SearchPage({ searchParams }: Props) {
                     <small>
                       {person?.fullName ?? "Public servant"} · {episode.podcast.title}
                     </small>
-                    <p>{segment.text}</p>
+                    <p>{highlightParts(segment.text, q).map((part, index) =>
+                      part.match ? <mark key={index}>{part.text}</mark> : <span key={index}>{part.text}</span>)}</p>
                   </span>
                 </Link>
               );
@@ -299,6 +327,13 @@ export default async function SearchPage({ searchParams }: Props) {
             <span>Episode titles and descriptions may still match below.</span>
           </div>
         )}
+        {totalPages > 1 ? (
+          <nav className="search-pagination" aria-label="Transcript match pages">
+            {filters.page > 1 ? <Link href={searchHref(filters, filters.page - 1)}>← Previous</Link> : null}
+            <span>Page {filters.page} of {totalPages}</span>
+            {filters.page < totalPages ? <Link href={searchHref(filters, filters.page + 1)}>Next →</Link> : null}
+          </nav>
+        ) : null}
       </section>
 
       <section className="section-block">
