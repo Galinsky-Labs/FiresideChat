@@ -117,6 +117,8 @@ npm run archive:status
 
 This emits the FC-P01 machine-readable coverage inventory. It keeps committed registry facts separate from the configured PostgreSQL snapshot; reports current officials by class (with D.C. shadow senators separate), qualified people, verified/candidate shows, publishing and feed-health states, episodes, known duration, transcript status/source, latest successful ingestion, deployed commit when Render provides it, and the actual best-effort scheduling policy. It never prints the database URL, credentials, inquiry details or transcript text.
 
+The same report for the deployed database is available to a signed-in administrator at `GET /api/admin/coverage` (session cookie required, `no-store`). Save a dated copy of that response when pinning a live production snapshot; a local run only describes the database it is pointed at.
+
 ## Failure response
 
 When `sync:archive` exits non-zero:
