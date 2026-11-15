@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 
 const MAX_ATTEMPTS = 8;
 const RETRY_DELAY_MINUTES = 20;
-const INQUIRY_ADMIN_URL = "https://fireside-chat-preview.onrender.com/admin/production-inquiries";
+const INQUIRY_ADMIN_URL = "https://firesidechat.onrender.com/admin/production-inquiries";
 
 function mailIsConfigured() {
   return Boolean(process.env.RESEND_API_KEY && process.env.PODCAST_INQUIRY_FROM_EMAIL);

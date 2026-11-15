@@ -1,0 +1,42 @@
+# Render deployment for FiresideChat (Galinsky Laboratories).
+# Service: firesidechat (free web service, Ohio) -> https://firesidechat.onrender.com
+# Database: Neon project "firesidechat" (pooled DATABASE_URL for runtime,
+# direct DIRECT_URL for migrations/seed in prestart).
+# Secrets are set in the Render dashboard only (sync: false).
+services:
+  - type: web
+    name: firesidechat
+    runtime: node
+    plan: free
+    region: ohio
+    branch: main
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health/ready
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=400
+      - key: TRANSCRIPTION_ENABLED
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        sync: false
+      - key: PODCAST_INQUIRY_ENCRYPTION_KEY
+        sync: false
+      - key: ENGINE_ROOM_INQUIRY_TOKEN
+        sync: false
+      # Optional, owner-supplied:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: PODCAST_INQUIRY_FROM_EMAIL
+        sync: false

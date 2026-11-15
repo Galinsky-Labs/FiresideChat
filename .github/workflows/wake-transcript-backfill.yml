@@ -17,4 +17,4 @@ jobs:
         run: |
           curl --fail --silent --show-error --location \
             --retry 2 --retry-delay 10 --max-time 110 \
-            'https://fireside-chat-preview.onrender.com/api/health/live'
+            'https://firesidechat.onrender.com/api/health/live'
