@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test \"src/**/*.test.ts\" \"tests/**/*.test.ts\"",
+    "test": "tsx --test \"src/**/*.test.ts\" \"tests/**/*.test.ts\" && npm run test:priority-directory",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
@@ -35,6 +35,7 @@
     "sync:archive": "tsx scripts/sync-archive.ts",
     "archive:status": "tsx scripts/archive-status.ts",
     "prearchive:status": "npm run prisma:generate",
+    "test:priority-directory": "python3 -m unittest discover -s tests -p 'test_priority_feed_review.py' -v",
     "host-review:batch": "tsx scripts/stage-host-review-batch.ts"
   },
   "dependencies": {
