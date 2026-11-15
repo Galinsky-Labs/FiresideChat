@@ -8,7 +8,7 @@
   ],
   "schemaVersion": 1,
   "roadmapVersion": 1,
-  "observedAt": "2026-10-11T17:39:04.772Z",
+  "observedAt": "2026-11-15T19:05:34.000Z",
   "units": [
     {
       "id": "MVP-01",
@@ -161,11 +161,14 @@
       "id": "FC-P01",
       "title": "Current production truth and master coverage inventory",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        52
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P02",
@@ -200,28 +203,36 @@
       "id": "FC-P04",
       "title": "Host/cohost/official-production verification queue",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        55
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P05",
       "title": "Historical/ambiguous feed and changed-host disambiguation",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        56
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P06",
       "title": "Priority missing public-official catalog review",
       "origin": "addition",
       "prs": [],
-      "contributingPrs": [],
+      "contributingPrs": [
+        58
+      ],
       "dependsOn": [],
       "externalDependencies": [],
       "externalPrerequisites": []
@@ -245,11 +256,14 @@
       "id": "FC-P08",
       "title": "Video-only shows and atypical podcast publication",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        57
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P09",
@@ -281,38 +295,51 @@
       "id": "FC-P11",
       "title": "Additional online transcript discovery before generation",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        64
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P12",
       "title": "Reliable automatic speech-to-text fallback",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        65
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [
+        "Authorized speech-to-text provider credentials and approved transcription spending (OPENAI_API_KEY, TRANSCRIPTION_ENABLED=true)"
+      ],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P13",
       "title": "Cost planning and full backlog throughput",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        65
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P14",
       "title": "Transcript integrity, correction and timestamp QA",
       "origin": "addition",
       "prs": [],
-      "contributingPrs": [],
+      "contributingPrs": [
+        64
+      ],
       "dependsOn": [],
       "externalDependencies": [],
       "externalPrerequisites": []
@@ -321,11 +348,14 @@
       "id": "FC-P15",
       "title": "Search that spans the entire verified historical archive",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        66
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P16",
@@ -345,11 +375,14 @@
       "id": "FC-P17",
       "title": "Protected editorial and operations dashboard",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        68
+      ],
       "contributingPrs": [],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "mappingEvidence": "Reviewed GitHub PR title/scope against the explicitly named planned capability"
     },
     {
       "id": "FC-P18",
@@ -382,10 +415,14 @@
       "title": "Exhaustive archival coverage acceptance and handoff closure",
       "origin": "addition",
       "prs": [],
-      "contributingPrs": [],
+      "contributingPrs": [
+        69
+      ],
       "dependsOn": [],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [
+        "Owner sign-off on independent sampling, rights/privacy, production backups/recovery and documented operating costs"
+      ]
     },
     {
       "id": "FC-P21",
@@ -402,6 +439,291 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 5326083715,
+      "number": 69,
+      "title": "FC-P20: archive coverage acceptance audit and methodology",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/69",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T19:03:03.000Z",
+      "updatedAt": "2026-11-15T19:05:15.000Z",
+      "closedAt": "2026-11-15T19:05:15.000Z",
+      "mergedAt": "2026-11-15T19:05:15.000Z",
+      "headSha": "cd65ef84627f6571ed2df7090681c2d666ef23c8",
+      "baseRef": "main",
+      "mergeCommitSha": "6dbaee4432c2d031acf982518e58a1b5086870db"
+    },
+    {
+      "id": 5326066412,
+      "number": 68,
+      "title": "FC-P17: protected editorial and operations queues",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/68",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T19:01:00.000Z",
+      "updatedAt": "2026-11-15T19:03:25.000Z",
+      "closedAt": "2026-11-15T19:03:25.000Z",
+      "mergedAt": "2026-11-15T19:03:25.000Z",
+      "headSha": "e650d974b11fbc9fc6ee5197a020c40b2cee68fc",
+      "baseRef": "main",
+      "mergeCommitSha": "caf3ac73d7ce03c390bd53bdf280c5081a054055"
+    },
+    {
+      "id": 5326026325,
+      "number": 67,
+      "title": "ops: Render firesidechat deployment and wake workflow URL",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/67",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T18:56:25.000Z",
+      "updatedAt": "2026-11-15T19:01:06.000Z",
+      "closedAt": "2026-11-15T19:01:06.000Z",
+      "mergedAt": "2026-11-15T19:01:06.000Z",
+      "headSha": "3b54bc55cf6d4235f8ef66902cffa40e0e2f1d35",
+      "baseRef": "main",
+      "mergeCommitSha": "ded6661c6cc839eca50baa6e277df3f59d77472a"
+    },
+    {
+      "id": 5326009578,
+      "number": 66,
+      "title": "FC-P15: ranked full-text archive search with filters",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/66",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T18:54:26.000Z",
+      "updatedAt": "2026-11-15T18:56:47.000Z",
+      "closedAt": "2026-11-15T18:56:46.000Z",
+      "mergedAt": "2026-11-15T18:56:46.000Z",
+      "headSha": "f344e5e062561e1e7e74cf921630b96911240611",
+      "baseRef": "main",
+      "mergeCommitSha": "4b25358fc6dd5265318e289f819df034b8a8fa9d"
+    },
+    {
+      "id": 5325974653,
+      "number": 65,
+      "title": "FC-P12/FC-P13: idempotent STT chunks, locked budget and backlog cost preview",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/65",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T18:50:20.000Z",
+      "updatedAt": "2026-11-15T18:57:46.000Z",
+      "closedAt": "2026-11-15T18:57:46.000Z",
+      "mergedAt": "2026-11-15T18:57:46.000Z",
+      "headSha": "6d5a53b7754fb2e7389271eeb7c551e72e4e7e7d",
+      "baseRef": "main",
+      "mergeCommitSha": "3e8d6dc8828574de3ff74de5ab5326d165d91ab4"
+    },
+    {
+      "id": 5325922494,
+      "number": 64,
+      "title": "FC-P11/FC-P14: transcript discovery matching and transcript QA",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/64",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T18:44:17.000Z",
+      "updatedAt": "2026-11-15T18:50:28.000Z",
+      "closedAt": "2026-11-15T18:50:28.000Z",
+      "mergedAt": "2026-11-15T18:50:28.000Z",
+      "headSha": "198f42344b32e53eac34ef6720a6f4205aa831bf",
+      "baseRef": "main",
+      "mergeCommitSha": "c762acc9b6d0474b66d131ce26507caf4dad519f"
+    },
+    {
+      "id": 5325778226,
+      "number": 63,
+      "title": "Fix registry repository identity; DB-tolerant build",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/63",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-15T18:27:30.000Z",
+      "updatedAt": "2026-11-15T18:29:09.000Z",
+      "closedAt": "2026-11-15T18:29:09.000Z",
+      "mergedAt": "2026-11-15T18:29:09.000Z",
+      "headSha": "60dcb389caa35d0d1f6d1283a0d75ae9e1e0dfc2",
+      "baseRef": "main",
+      "mergeCommitSha": "f6b5d74445dfe8dcd0105002639d90c997af83b9"
+    },
+    {
+      "id": 5235377167,
+      "number": 62,
+      "title": "Integrate Instagram Business Discovery for verified politician video conversations",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/62",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-10T03:40:48.000Z",
+      "updatedAt": "2026-11-10T03:41:01.000Z",
+      "closedAt": "2026-11-10T03:41:01.000Z",
+      "mergedAt": "2026-11-10T03:41:01.000Z",
+      "headSha": "a143e5ef1e12db73ed5acb64ee4e7dbfa9a7bab4",
+      "baseRef": "main",
+      "mergeCommitSha": "371ece273f1d76ef368af825459dc401ca184a53"
+    },
+    {
+      "id": 5235336963,
+      "number": 61,
+      "title": "Add verified personal video chats and livestreams to FiresideChat",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/61",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-11-10T03:35:57.000Z",
+      "updatedAt": "2026-11-10T03:36:46.000Z",
+      "closedAt": "2026-11-10T03:36:46.000Z",
+      "mergedAt": "2026-11-10T03:36:46.000Z",
+      "headSha": "7995e221240915611e2831d5c8997bc297584c9b",
+      "baseRef": "main",
+      "mergeCommitSha": "7e9cafc42396da65ebd4bb9c907dd8bc46780698"
+    },
+    {
+      "id": 4941649306,
+      "number": 59,
+      "title": "Integrate Development Deployment Monitor (inventory-only)",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/59",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-20T19:57:43.000Z",
+      "updatedAt": "2026-10-20T20:02:04.000Z",
+      "closedAt": "2026-10-20T20:02:04.000Z",
+      "mergedAt": "2026-10-20T20:02:04.000Z",
+      "headSha": "681550a4d9f049fd13b42e29598aee3f739d23cb",
+      "baseRef": "main",
+      "mergeCommitSha": "95d6744262eb90346994420d1c7111358171db6a"
+    },
+    {
+      "id": 4913398979,
+      "number": 58,
+      "title": "FC-P06: Priority missing public-official catalog review",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/58",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-18T22:31:06.000Z",
+      "updatedAt": "2026-11-15T18:39:22.000Z",
+      "closedAt": "2026-11-15T18:39:21.000Z",
+      "mergedAt": "2026-11-15T18:39:21.000Z",
+      "headSha": "e41dd7ab80a714ff6560f44eed92ce20eb1de39a",
+      "baseRef": "main",
+      "mergeCommitSha": "24f912b1c4338b040de093639277ad44b9d6dbc9"
+    },
+    {
+      "id": 4913204857,
+      "number": 57,
+      "title": "FC-P08: Video-only shows and atypical podcast publication",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/57",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-18T22:01:49.000Z",
+      "updatedAt": "2026-11-15T18:37:14.000Z",
+      "closedAt": "2026-11-15T18:37:14.000Z",
+      "mergedAt": "2026-11-15T18:37:14.000Z",
+      "headSha": "fa4ddfea91265bbf78c46220df8097cbe9275080",
+      "baseRef": "main",
+      "mergeCommitSha": "de518f80efbc7c6a16d532015b70aa882f1e6a76"
+    },
+    {
+      "id": 4913196720,
+      "number": 56,
+      "title": "FC-P05: Historical/ambiguous feed and changed-host disambiguation",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/56",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-18T22:00:46.000Z",
+      "updatedAt": "2026-11-15T18:34:29.000Z",
+      "closedAt": "2026-11-15T18:34:29.000Z",
+      "mergedAt": "2026-11-15T18:34:29.000Z",
+      "headSha": "fb935d4712004da0cfe4bd36adea6b87de1a0870",
+      "baseRef": "main",
+      "mergeCommitSha": "c1bb4d4aa5c4fe047fe0fe6935141258e053343b"
+    },
+    {
+      "id": 4913190711,
+      "number": 55,
+      "title": "FC-P04: Host/cohost/official-production verification queue",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/55",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-18T22:00:00.000Z",
+      "updatedAt": "2026-11-15T18:31:37.000Z",
+      "closedAt": "2026-11-15T18:31:36.000Z",
+      "mergedAt": "2026-11-15T18:31:36.000Z",
+      "headSha": "5a3fc90b18a3e83420adf52b86366a92f2cb51ab",
+      "baseRef": "main",
+      "mergeCommitSha": "4c32299c4157f27cfcd3e525b8046eafcb45c80b"
+    },
+    {
+      "id": 4848370547,
+      "number": 54,
+      "title": "Standardize the canonical PR registry for Boardroom and Engine Room",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/54",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-13T19:27:32.000Z",
+      "updatedAt": "2026-10-16T15:18:38.000Z",
+      "closedAt": "2026-10-16T15:18:38.000Z",
+      "mergedAt": "2026-10-16T15:18:38.000Z",
+      "headSha": "e73b88daf06ad0a94a6ca1ed75ee77d6466701ac",
+      "baseRef": "main",
+      "mergeCommitSha": "5cd92f2df739655fa555c19e92530375c1a64de7"
+    },
+    {
+      "id": 4848032919,
+      "number": 53,
+      "title": "Owner policy: proceed with AI security review; defer external audit",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/53",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-13T18:58:25.000Z",
+      "updatedAt": "2026-10-13T19:15:22.000Z",
+      "closedAt": "2026-10-13T19:15:22.000Z",
+      "mergedAt": "2026-10-13T19:15:22.000Z",
+      "headSha": "5f337a6e840bb5a5cc6c6918e2534b78a15fc9a0",
+      "baseRef": "main",
+      "mergeCommitSha": "e792cf0191609bad19112ff9f0f5b915855cfe11"
+    },
+    {
+      "id": 4840533298,
+      "number": 52,
+      "title": "FC-P01: Add reproducible archive coverage inventory",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/52",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-13T08:30:34.000Z",
+      "updatedAt": "2026-11-15T18:44:31.000Z",
+      "closedAt": "2026-11-15T18:44:31.000Z",
+      "mergedAt": "2026-11-15T18:44:30.000Z",
+      "headSha": "98e75dd19686c529133b22512527028ee72fe32d",
+      "baseRef": "main",
+      "mergeCommitSha": "d63c079c386f1d6ee3b57084826ad5472ad64961"
+    },
+    {
+      "id": 4831960063,
+      "number": 51,
+      "title": "Run full Fireside Chat PostgreSQL CI on CircleCI",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/51",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-12T16:05:01.000Z",
+      "updatedAt": "2026-11-15T18:35:22.000Z",
+      "closedAt": "2026-11-15T18:35:22.000Z",
+      "mergedAt": null,
+      "headSha": "20bc7f1f29548bcfcc1b409239285d599b0fbfc3",
+      "baseRef": "main",
+      "mergeCommitSha": "f6b5e5cb9c76ff0c173dffe5f52a00bedb94d561"
+    },
+    {
+      "id": 4830035884,
+      "number": 50,
+      "title": "Track E2EESA implementation, full testing and independent expert review",
+      "url": "https://github.com/Galinsky-Labs/FiresideChat/pull/50",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-12T13:22:34.000Z",
+      "updatedAt": "2026-10-12T14:16:50.000Z",
+      "closedAt": "2026-10-12T14:16:50.000Z",
+      "mergedAt": "2026-10-12T14:16:50.000Z",
+      "headSha": "c31ed1b7fcbc95462612ab5521834a375b757514",
+      "baseRef": "main",
+      "mergeCommitSha": "add8e617d2f83acdf8b746a782e6003cabe1518f"
+    },
     {
       "id": 4811872317,
       "number": 49,
