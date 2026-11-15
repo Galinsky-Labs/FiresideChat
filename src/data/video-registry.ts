@@ -1,4 +1,5 @@
 import { validateVideoSource } from "@/lib/video-sources";
+import { classifyPublication } from "@/lib/publication-evidence";
 
 export type VerifiedVideo = {
   personSlug: string;
@@ -47,5 +48,13 @@ export function validateVideoRegistry(videos: readonly VerifiedVideo[]) {
         !Number.isFinite(Date.parse(video.publishedAt))) {
       throw new Error("Incomplete verified video: " + key);
     }
+    // FC-P08: a verified primary-source video is a feedless archive item and
+    // must never be routed into RSS episode ingestion.
+    const publication = classifyPublication({
+      personId: video.personSlug, showId: key, platform: "VIDEO",
+      sourceUrl: video.sourceUrl, hostVerified: true, mediaPublished: true,
+    });
+    if (publication.status !== "NON_RSS_ARCHIVE" || publication.ingestable)
+      throw new Error("Video must be classified as a non-RSS archive item: " + key);
   }
 }
