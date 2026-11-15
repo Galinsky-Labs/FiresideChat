@@ -1,28 +1,11 @@
 import "dotenv/config";
+import { readCoverageInventory } from "../src/lib/coverage-inventory-store";
 import { db } from "../src/lib/db";
-import { getOperationalHealth } from "../src/lib/operational-health";
 
 async function main() {
-  const health = await getOperationalHealth();
-  const transcriptFailures = await db.episode.count({
-    where: { transcriptStatus: "FAILED" },
-  });
-
-  console.log(
-    JSON.stringify(
-      {
-        ...health,
-        archive: {
-          ...health.archive,
-          transcriptFailures,
-        },
-      },
-      null,
-      2,
-    ),
-  );
+  const report = await readCoverageInventory();
+  console.log(JSON.stringify(report, null, 2));
 }
-
 main()
   .catch((error) => {
     console.error(error);
