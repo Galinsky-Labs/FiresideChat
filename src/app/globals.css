@@ -2107,3 +2107,52 @@ h3 {
 .video-player { position: relative; width: 100%; aspect-ratio: 16/9; margin: 2rem 0; border-radius: 1rem; overflow: hidden; background: var(--navy-deep); }
 .video-player iframe { width: 100%; height: 100%; border: 0; }
 .video-transcript { white-space: pre-wrap; line-height: 1.8; }
+
+/* FC-P15 search filters, highlights and pagination */
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: end;
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel-cool);
+  border: 1px solid var(--line);
+}
+.search-filters label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.search-filters select,
+.search-filters input {
+  min-height: 2.25rem;
+  padding: 0.3rem 0.5rem;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line-dark);
+  font: inherit;
+}
+.search-filters button {
+  min-height: 2.25rem;
+  padding: 0.3rem 1rem;
+  color: #fff;
+  background: var(--navy);
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.transcript-search-copy mark {
+  padding: 0 0.1em;
+  color: inherit;
+  background: color-mix(in srgb, var(--red) 16%, transparent);
+}
+.search-pagination {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.25rem;
+  color: var(--muted);
+}
