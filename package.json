@@ -38,7 +38,9 @@
     "test:priority-directory": "python3 -m unittest discover -s tests -p 'test_priority_feed_review.py' -v",
     "host-review:batch": "tsx scripts/stage-host-review-batch.ts",
     "transcription:plan": "tsx scripts/transcription-plan.ts",
-    "pretranscription:plan": "npm run prisma:generate"
+    "pretranscription:plan": "npm run prisma:generate",
+    "coverage:acceptance": "tsx scripts/coverage-acceptance.ts",
+    "precoverage:acceptance": "npm run prisma:generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
