@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EpisodeCard } from "@/components/episode-card";
 import { ShowCard } from "@/components/show-card";
+import { VideoChatCard } from "@/components/video-chat-card";
 import { LiveArchiveStats } from "@/components/live-archive-stats";
 import { getArchiveStats } from "@/lib/archive-stats";
 import { db } from "@/lib/db";
@@ -22,6 +23,7 @@ export default async function Home() {
     chronologicalEpisodes,
     podcasts,
     archiveStats,
+    latestVideos,
   ] = await Promise.all([
     db.episode.findMany({
       orderBy: { publishedAt: "desc" },
@@ -40,6 +42,12 @@ export default async function Home() {
       },
     }),
     getArchiveStats(),
+    db.videoChat.findMany({
+      where: { active: true },
+      include: { person: true },
+      orderBy: { publishedAt: "desc" },
+      take: 6,
+    }),
   ]);
 
   const latestEpisodes = selectHomepageEpisodes(chronologicalEpisodes, 6);
@@ -100,6 +108,23 @@ export default async function Home() {
             <strong>The archive is ready for its first sync.</strong>
             <span>Run <code>npm run ingest:feeds</code> and reload this page.</span>
           </div>
+        )}
+      </section>
+
+      <section className="section-block" id="video-conversations">
+        <div className="section-heading">
+          <div>
+            <p className="section-label">Beyond podcasts</p>
+            <h2>Personal conversations</h2>
+          </div>
+          <Link className="text-link" href="/videos">Browse all videos →</Link>
+        </div>
+        {latestVideos.length ? (
+          <div className="video-chat-grid">
+            {latestVideos.map((video) => <VideoChatCard key={video.id} video={video} />)}
+          </div>
+        ) : (
+          <p className="section-explainer">Verified personal chats and livestreams will appear here.</p>
         )}
       </section>
 

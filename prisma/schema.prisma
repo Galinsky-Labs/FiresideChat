@@ -7,6 +7,19 @@ datasource db {
   provider = "postgresql"
 }
 
+enum VideoFormat {
+  PERSONAL_CHAT
+  LIVESTREAM
+  Q_AND_A
+  BEHIND_THE_SCENES
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  INSTAGRAM
+  OTHER
+}
+
 enum PersonKind {
   HOUSE
   SENATE
@@ -61,6 +74,7 @@ model Person {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   podcasts     PodcastPerson[]
+  videos       VideoChat[]
 
   @@index([isCurrent])
   @@index([kind])
@@ -107,42 +121,42 @@ model PodcastPerson {
   podcastId String
   personId  String
   role      PodcastRole
-  podcast   Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-  person    Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  podcast   Podcast     @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  person    Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@id([podcastId, personId, role])
   @@index([personId])
 }
 
 model Episode {
-  id               String           @id @default(cuid())
-  podcastId        String
-  guid             String
-  title            String
-  description      String?
-  publishedAt      DateTime
-  sourceUpdatedAt  DateTime?
-  durationSeconds  Int?
-  audioUrl         String
-  audioMimeType    String?
-  episodeUrl       String?
-  imageUrl         String?
-  publisherTranscriptUrl      String?
-  publisherTranscriptMimeType String?
-  transcriptStatus          TranscriptStatus @default(MISSING)
-  transcriptionAttempts     Int              @default(0)
-  publisherTranscriptAttempts       Int       @default(0)
-  publisherTranscriptLastAttemptAt  DateTime?
-  publisherTranscriptLastError      String?
-  transcriptDiscoveryAttempts       Int       @default(0)
-  transcriptDiscoveryLastAttemptAt  DateTime?
-  transcriptDiscoveryLastError      String?
-  transcriptionLastAttemptAt DateTime?
-  transcriptionLastError    String?
-  createdAt                 DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  podcast          Podcast          @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-  transcript       Transcript?
+  id                               String           @id @default(cuid())
+  podcastId                        String
+  guid                             String
+  title                            String
+  description                      String?
+  publishedAt                      DateTime
+  sourceUpdatedAt                  DateTime?
+  durationSeconds                  Int?
+  audioUrl                         String
+  audioMimeType                    String?
+  episodeUrl                       String?
+  imageUrl                         String?
+  publisherTranscriptUrl           String?
+  publisherTranscriptMimeType      String?
+  transcriptStatus                 TranscriptStatus @default(MISSING)
+  transcriptionAttempts            Int              @default(0)
+  publisherTranscriptAttempts      Int              @default(0)
+  publisherTranscriptLastAttemptAt DateTime?
+  publisherTranscriptLastError     String?
+  transcriptDiscoveryAttempts      Int              @default(0)
+  transcriptDiscoveryLastAttemptAt DateTime?
+  transcriptDiscoveryLastError     String?
+  transcriptionLastAttemptAt       DateTime?
+  transcriptionLastError           String?
+  createdAt                        DateTime         @default(now())
+  updatedAt                        DateTime         @updatedAt
+  podcast                          Podcast          @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  transcript                       Transcript?
 
   @@unique([podcastId, guid])
   @@index([publishedAt])
@@ -192,7 +206,6 @@ model IngestionRun {
   @@index([podcastId, startedAt])
   @@index([status])
 }
-
 
 enum InquiryEmailStatus {
   PENDING
@@ -261,8 +274,8 @@ enum HostReviewAction {
 }
 
 model HostReviewCandidate {
-  id                String                @id @default(cuid())
-  identityKey       String                @unique
+  id                String               @id @default(cuid())
+  identityKey       String               @unique
   officialKey       String
   officialName      String
   identitySourceUrl String
@@ -270,15 +283,15 @@ model HostReviewCandidate {
   showTitle         String
   proposedRole      HostReviewRole
   feedCandidateUrl  String?
-  hostStartOn       DateTime?             @db.Date
-  hostEndOn         DateTime?             @db.Date
-  status            HostReviewStatus      @default(PENDING)
-  revision          Int                   @default(0)
+  hostStartOn       DateTime?            @db.Date
+  hostEndOn         DateTime?            @db.Date
+  status            HostReviewStatus     @default(PENDING)
+  revision          Int                  @default(0)
   reviewNote        String?
   reviewerRef       String?
   reviewedAt        DateTime?
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
   evidence          HostReviewEvidence[]
   audit             HostReviewAudit[]
 
@@ -311,4 +324,29 @@ model HostReviewAudit {
   candidate   HostReviewCandidate @relation(fields: [candidateId], references: [id], onDelete: Restrict)
 
   @@unique([candidateId, revision])
+}
+
+model VideoChat {
+  id               String        @id @default(cuid())
+  personId         String
+  person           Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  platform         VideoPlatform
+  format           VideoFormat
+  platformVideoId  String
+  sourceUrl        String        @unique
+  verificationUrl  String
+  verificationNote String
+  verifiedAt       DateTime
+  publisherName    String
+  publishedAt      DateTime
+  transcriptText   String?
+  active           Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@unique([platform, platformVideoId])
+  @@index([personId, publishedAt])
+  @@index([active, publishedAt])
 }
