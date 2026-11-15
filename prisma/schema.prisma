@@ -81,14 +81,14 @@ model Person {
 }
 
 model Podcast {
-  id                    String           @id @default(cuid())
-  slug                  String           @unique
+  id                    String            @id @default(cuid())
+  slug                  String            @unique
   title                 String
-  rssUrl                String           @unique
+  rssUrl                String            @unique
   websiteUrl            String?
   description           String?
-  active                Boolean          @default(true)
-  publishingStatus      PublishingStatus @default(UNKNOWN)
+  active                Boolean           @default(true)
+  publishingStatus      PublishingStatus  @default(UNKNOWN)
   verificationUrl       String?
   verifiedAt            DateTime?
   verificationNote      String?
@@ -103,11 +103,12 @@ model Podcast {
   lastCheckedAt         DateTime?
   lastSuccessfulCheckAt DateTime?
   lastEpisodeAt         DateTime?
-  consecutiveFailures   Int              @default(0)
+  consecutiveFailures   Int               @default(0)
   nextRetryAt           DateTime?
   lastError             String?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  feedScopes            FeedScopeRecord[]
   people                PodcastPerson[]
   episodes              Episode[]
   ingestionRuns         IngestionRun[]
@@ -131,6 +132,7 @@ model PodcastPerson {
 model Episode {
   id                               String           @id @default(cuid())
   podcastId                        String
+  sourceFeedUrl                    String?
   guid                             String
   title                            String
   description                      String?
@@ -161,6 +163,7 @@ model Episode {
   @@unique([podcastId, guid])
   @@index([publishedAt])
   @@index([podcastId, publishedAt])
+  @@index([podcastId, sourceFeedUrl])
   @@index([transcriptStatus])
 }
 
@@ -236,6 +239,89 @@ model PodcastProductionInquiry {
   @@index([clientHash, submittedAt])
   @@index([contactEmailHash, submittedAt])
   @@index([emailStatus, emailLastAttemptAt])
+}
+
+enum FeedScopeMode {
+  DEDICATED
+  SHARED
+}
+
+enum FeedScopeReview {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum FeedScopeEvent {
+  SUBMITTED
+  EPISODE_EVIDENCE_ADDED
+  HOST_EVIDENCE_ADDED
+  APPROVED
+  REJECTED
+  ACTIVATED
+}
+
+model FeedScopeRecord {
+  id               String             @id @default(cuid())
+  podcastId        String
+  feedUrl          String
+  publishedTitle   String
+  publishedWebsite String?
+  mode             FeedScopeMode
+  status           FeedScopeReview    @default(PENDING)
+  reviewSourceUrl  String?
+  reviewNote       String?
+  reviewerRef      String?
+  reviewedOn       DateTime?          @db.Date
+  revision         Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  podcast          Podcast            @relation(fields: [podcastId], references: [id], onDelete: Restrict)
+  hosts            FeedScopeHost[]
+  episodes         FeedScopeEpisode[]
+  audit            FeedScopeAudit[]
+
+  @@unique([podcastId, feedUrl])
+  @@index([status, createdAt])
+}
+
+model FeedScopeHost {
+  id         String          @id @default(cuid())
+  scopeId    String
+  personId   String
+  role       PodcastRole
+  fromOn     DateTime        @db.Date
+  toOn       DateTime?       @db.Date
+  sourceUrl  String
+  observedOn DateTime        @db.Date
+  scope      FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
+
+  @@unique([scopeId, personId, role, fromOn])
+  @@index([scopeId, personId])
+}
+
+model FeedScopeEpisode {
+  id         String          @id @default(cuid())
+  scopeId    String
+  guid       String
+  sourceUrl  String
+  observedOn DateTime        @db.Date
+  scope      FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
+
+  @@unique([scopeId, guid])
+}
+
+model FeedScopeAudit {
+  id        String          @id @default(cuid())
+  scopeId   String
+  revision  Int
+  actorRef  String
+  event     FeedScopeEvent
+  note      String
+  createdAt DateTime        @default(now())
+  scope     FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
+
+  @@unique([scopeId, revision])
 }
 
 enum HostReviewRole {
