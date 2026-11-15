@@ -3,6 +3,7 @@ import { OPENAI_PROVIDER, transcribeAudioWithOpenAI } from "./openai-transcripti
 import { estimatedSeconds, remainingBudgetSeconds } from "./budget";
 import { orderEpisodesFairly } from "./backlog-plan";
 import { prismaChunkLedger, TRANSCRIPTION_BUDGET_LOCK, usageSince } from "./stt-store";
+import { prepareTranscriptForStorage } from "./transcript-qa";
 
 const DEFAULT_LIMIT = 2;
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -216,27 +217,29 @@ export async function transcribeMissingEpisodes(options: {
         continue;
       }
 
+      // FC-P14: generated text never carries speaker names and broken timing is dropped.
+      const prepared = prepareTranscriptForStorage(transcript, "GENERATED", episode.durationSeconds);
       const row = await db.transcript.upsert({
         where: { episodeId: episode.id },
         create: {
           episodeId: episode.id,
           source: "GENERATED",
           language: transcript.language ?? "en",
-          fullText: transcript.fullText,
+          fullText: prepared.fullText,
         },
         update: {
           source: "GENERATED",
           language: transcript.language ?? "en",
-          fullText: transcript.fullText,
+          fullText: prepared.fullText,
         },
       });
 
       await db.transcriptSegment.deleteMany({
         where: { transcriptId: row.id },
       });
-      if (transcript.segments.length > 0) {
+      if (prepared.segments.length > 0) {
         await db.transcriptSegment.createMany({
-          data: transcript.segments.map((segment) => ({
+          data: prepared.segments.map((segment) => ({
             transcriptId: row.id,
             startSeconds: segment.startSeconds,
             endSeconds: segment.endSeconds,
