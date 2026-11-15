@@ -24,6 +24,12 @@ npm run sync:archive
 
 If the archive later needs faster freshness, the same command can be scheduled more frequently without changing the application architecture. RSS conditional requests and feed retry backoff reduce unnecessary transfer.
 
+## Deployment (Galinsky Laboratories)
+
+- Render web service `firesidechat` (free plan, Ohio): https://firesidechat.onrender.com — see `render.yaml`. Build `npm install && npm run build`; start `npm start` (prestart applies migrations and the seed through `DIRECT_URL`); health check `/api/health/ready`.
+- Database: Neon project `firesidechat` (aws-us-east-2, PostgreSQL 17). `DATABASE_URL` is the pooled endpoint, `DIRECT_URL` the direct endpoint.
+- `fireside-chat-preview.onrender.com` is a legacy preview outside this Render account; nothing here deploys to or wakes it.
+
 ## Automatic transcript recovery on the Render preview
 
 On the current free Render preview, a paid cron job is unavailable. The
