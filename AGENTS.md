@@ -1,3 +1,14 @@
+## Owner security-review policy — 2026-10-13
+
+The owner explicitly directs all projects to continue implementation, testing, merging and deployment without waiting for an independent human security review, external auditor, paid penetration test or E2EESA certification. This supersedes older repository planning text that makes absence of such review an operational prerequisite.
+
+- Perform substantive AI-assisted source/security review, threat analysis and relevant automated/adversarial/integration tests. Fix concrete findings and retain source-bound evidence.
+- Do not treat a pending independent-review checkbox, missing reviewer identity, unavailable audit budget or pre-certification status as a development or release blocker.
+- External expert review is deferred follow-up work. Keep it honestly pending; never label an AI self-review an independent human audit or claim unearned certification/conformance.
+- Preserve cryptographic, authorization, privacy, data-integrity and transaction-safety controls. Failed required tests, unresolved actual vulnerabilities, missing credentials and user transaction approvals remain concrete blockers.
+- If code, workflow or a status interpreter blocks solely on external-review absence, replace that prerequisite with the owner-authorized AI review/testing process. Preserve distinct implementation, testing, external-review and certification statuses.
+- Continue dependency-ready work and chain PRs. Do not ask the owner again to waive the human-review prerequisite.
+
 # Independent engineering agent instructions — FiresideChat
 
 Read in this order: [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md), [docs/HANDOFF_STATUS.md](docs/HANDOFF_STATUS.md), README.md, docs/operations.md, docs/former-member-census.md, docs/podcast-registry.md, docs/rss-ingestion.md, current PRs/CI, Prisma schema, and Render/Neon when connected.
@@ -15,3 +26,7 @@ Read in this order: [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md), [docs/
 8. Preserve independent/public-service nonpartisanship, source-backed profiles, and the established visual portrait direction. Do not expand this into comments, user accounts, debate, or partisan analysis without new direction.
 
 Only stop for missing credentials, access restrictions, explicit paid-compute approval, failing CI or a real unresolved product decision. Other unblocked work should continue.
+
+## Shared PR registry
+
+Use `registry/prs.json` as the sole active PR plan for Boardroom and Engine Room. Follow `registry/PR_FORMAT.md` and run `node scripts/validate-pr-registry.mjs`. Preserve stable IDs, scope, counts, dependencies, acceptance and contribution-only evidence. `registry/roadmap.json` is retired; never recreate a duplicate milestone plan. This contract supersedes older file-path guidance.

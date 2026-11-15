@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { EpisodeCard } from "@/components/episode-card";
+import { VideoChatCard } from "@/components/video-chat-card";
 import { IllustratedPortrait } from "@/components/illustrated-portrait";
 import { db } from "@/lib/db";
+import { feedAttributionForPodcast } from "@/lib/feed-scope-store";
+import { archiveVisibleWhere } from "@/lib/feed-scope-store";
 import { officeLabel } from "@/lib/presentation";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +62,8 @@ export default async function SearchPage({ searchParams }: Props) {
     );
   }
 
-  const [people, podcasts, episodes, transcriptSegments, plainTranscripts] =
+  const publicEpisodeWhere=await archiveVisibleWhere();
+  const [people, podcasts, episodes, transcriptSegments, plainTranscripts, videos] =
     await Promise.all([
     db.person.findMany({
       where: { fullName: { contains: q, mode: "insensitive" } },
@@ -79,10 +83,10 @@ export default async function SearchPage({ searchParams }: Props) {
     }),
     db.episode.findMany({
       where: {
-        OR: [
+        AND:[publicEpisodeWhere,{OR: [
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
-        ],
+        ]}],
       },
       include: {
         podcast: { include: { people: { include: { person: true } } } },
@@ -91,7 +95,8 @@ export default async function SearchPage({ searchParams }: Props) {
       take: 40,
     }),
     db.transcriptSegment.findMany({
-      where: { text: { contains: q, mode: "insensitive" } },
+      where: { text: { contains: q, mode: "insensitive" },
+        transcript: { is: { episode: { is: publicEpisodeWhere } } } },
       include: {
         transcript: {
           include: {
@@ -111,6 +116,7 @@ export default async function SearchPage({ searchParams }: Props) {
       where: {
         fullText: { contains: q, mode: "insensitive" },
         segments: { none: {} },
+        episode: { is: publicEpisodeWhere },
       },
       include: {
         episode: {
@@ -124,7 +130,36 @@ export default async function SearchPage({ searchParams }: Props) {
       orderBy: { episode: { publishedAt: "desc" } },
       take: 20,
     }),
+    db.videoChat.findMany({
+      where: {
+        active: true,
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { transcriptText: { contains: q, mode: "insensitive" } },
+          { person: { fullName: { contains: q, mode: "insensitive" } } },
+        ],
+      },
+      include: { person: true },
+      orderBy: { publishedAt: "desc" },
+      take: 40,
+    }),
   ]);
+
+  // Resolve the actual source-reviewed episode host, not the first person linked to a shared show.
+  const allEpisodeRows=[...episodes,...transcriptSegments.map(s=>s.transcript.episode),...plainTranscripts.map(t=>t.episode)];
+  const podcastIds=[...new Set(allEpisodeRows.map(e=>e.podcastId))];
+  const scopedPairs=await Promise.all(podcastIds.map(async id=>
+    [id,await feedAttributionForPodcast(id)] as const));
+  const scopeIndex=new Map(scopedPairs);
+  const hostIds=[...new Set(allEpisodeRows.flatMap(e=>scopeIndex.get(e.podcastId)?.(e)??[]))];
+  const attributedPeople=hostIds.length?await db.person.findMany({where:{id:{in:hostIds}}}):[];
+  const byPerson=new Map(attributedPeople.map(p=>[p.id,p]));
+  const creditedPerson=(episode:(typeof episodes)[number])=>{
+    const scoped=scopeIndex.get(episode.podcastId);
+    if(!scoped)return episode.podcast.people[0]?.person;
+    return scoped(episode).map(id=>byPerson.get(id)).find(p=>p);
+  };
 
   transcriptSegments.sort(
     (a, b) =>
@@ -181,14 +216,23 @@ export default async function SearchPage({ searchParams }: Props) {
         </div>
         <div className="search-show-results">
           {podcasts.map((podcast) => {
-            const person = podcast.people[0]?.person;
             return (
               <Link className="search-show-result" href={`/podcasts/${podcast.slug}`} key={podcast.id}>
                 <strong>{podcast.title}</strong>
-                <span>{person?.fullName ?? "Public servant"}</span>
+                <span>Public-service podcast archive</span>
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading"><div>
+          <p className="section-label">Personal conversations</p>
+          <h2>{videos.length} video matches</h2>
+        </div></div>
+        <div className="video-chat-grid">
+          {videos.map((video) => <VideoChatCard key={video.id} video={video} />)}
         </div>
       </section>
 
@@ -208,7 +252,7 @@ export default async function SearchPage({ searchParams }: Props) {
           <div className="transcript-search-results">
             {transcriptSegments.map((segment) => {
               const episode = segment.transcript.episode;
-              const person = episode.podcast.people[0]?.person;
+              const person = creditedPerson(episode);
               return (
                 <Link
                   className="transcript-search-result"
@@ -230,7 +274,7 @@ export default async function SearchPage({ searchParams }: Props) {
             })}
             {plainTranscripts.map((transcript) => {
               const episode = transcript.episode;
-              const person = episode.podcast.people[0]?.person;
+              const person = creditedPerson(episode);
               return (
                 <Link
                   className="transcript-search-result"
@@ -266,7 +310,7 @@ export default async function SearchPage({ searchParams }: Props) {
         </div>
         <div className="episode-list">
           {episodes.map((episode) => {
-            const person = episode.podcast.people[0]?.person;
+            const person = creditedPerson(episode);
             if (!person) return null;
             return (
               <EpisodeCard

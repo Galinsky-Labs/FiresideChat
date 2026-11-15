@@ -29,6 +29,10 @@ async function main() {
 
   results.push(await runStep("Feed ingestion", "ingest:feeds"));
 
+  if (process.env.INSTAGRAM_SYNC_ENABLED === "true") {
+    results.push(await runStep("Authorized Instagram discovery", "ingest:instagram"));
+  }
+
   results.push(await runStep("Publisher and episode-page transcript recovery", "backfill:transcripts"));
 
   results.push(

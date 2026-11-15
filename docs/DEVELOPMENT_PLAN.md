@@ -1,3 +1,5 @@
+> Current PR registry: `registry/prs.json` is the single source for Boardroom and Engine Room. Earlier references below to `registry/roadmap.json` are superseded. Preserve the approved scope and acceptance requirements. See `registry/PR_FORMAT.md`.
+
 > **Canonical PR roadmap:** [`registry/roadmap.json`](../registry/roadmap.json). Historical complete development specifications remain below; new PRs and counts must be entered only in the canonical file.
 
 # FiresideChat — complete original and expanded development plan, podcast census, transcript recovery, and independent-account handoff

@@ -1,0 +1,78 @@
+version: 2.1
+
+# Port of .github/workflows/ci.yml (full PostgreSQL-backed validation).
+jobs:
+  full-verification:
+    docker:
+      - image: cimg/node:22.23.3
+      - image: cimg/postgres:17.11
+        environment:
+          POSTGRES_DB: fireside_chat
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    resource_class: large
+    environment:
+      CI: "true"
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/fireside_chat?schema=public
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies (same npm install used by current CI)
+          command: npm install --no-audit --no-fund
+      - run:
+          name: Validate verified people registry
+          command: npm run registry:validate
+      - run:
+          name: Generate Prisma client
+          command: npm run prisma:generate
+      - run:
+          name: Wait for PostgreSQL
+          command: npm run db:wait
+      - run:
+          name: Apply PostgreSQL migrations
+          command: npm run db:deploy
+      - run:
+          name: Seed verified registry
+          command: npm run db:seed
+      - run:
+          name: Full feed ingestion and transcription test suite
+          command: npm test
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Typecheck
+          command: npm run typecheck
+      - run:
+          name: Production build
+          command: npm run build
+      - run:
+          name: HTTP crawl of built application
+          command: |
+            npm run start > /tmp/fireside-chat-circleci.log 2>&1 &
+            APP_PID=$!
+            trap 'cat /tmp/fireside-chat-circleci.log; kill "$APP_PID" 2>/dev/null || true' EXIT
+            for attempt in $(seq 1 20); do
+              if curl --fail --silent http://127.0.0.1:3000/api/health > /dev/null; then
+                break
+              fi
+              sleep 1
+            done
+            npm run smoke:mvp
+
+  security-status-record:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Validate E2EESA status record (integrity only, not certification)
+          command: python3 scripts/validate_e2eesa_status.py
+
+workflows:
+  full-ci:
+    jobs:
+      - full-verification
+      - security-status-record

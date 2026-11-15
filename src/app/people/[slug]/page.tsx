@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EpisodeCard } from "@/components/episode-card";
+import { VideoChatCard } from "@/components/video-chat-card";
 import { IllustratedPortrait } from "@/components/illustrated-portrait";
 import { profileForSlug } from "@/data/person-profiles";
 import { db } from "@/lib/db";
+import { reviewedEpisodeWhere } from "@/lib/feed-scope-store";
 import { officeLabel } from "@/lib/presentation";
 
 export const dynamic = "force-dynamic";
@@ -36,16 +38,14 @@ export default async function PersonPage({ params }: Props) {
   const person = await db.person.findUnique({
     where: { slug },
     include: {
+      videos: {
+        where: { active: true },
+        orderBy: { publishedAt: "desc" },
+        take: 50,
+      },
       podcasts: {
         include: {
-          podcast: {
-            include: {
-              episodes: {
-                orderBy: { publishedAt: "desc" },
-                take: 30,
-              },
-            },
-          },
+          podcast: true,
         },
       },
     },
@@ -54,6 +54,13 @@ export default async function PersonPage({ params }: Props) {
   if (!person) notFound();
 
   const profile = profileForSlug(person.slug);
+  const scopedEpisodes=await Promise.all(person.podcasts.map(async ({podcast})=>{
+    const reviewed=await reviewedEpisodeWhere(podcast.id,person.id);
+    return {podcast, episodes:await db.episode.findMany({
+      where:{podcastId:podcast.id,...reviewed},
+      orderBy:{publishedAt:"desc"},take:30,
+    })};
+  }));
 
   return (
     <div className="detail-page">
@@ -142,6 +149,20 @@ export default async function PersonPage({ params }: Props) {
         </>
       ) : null}
 
+      {person.videos.length > 0 ? (
+        <section className="section-block">
+          <div className="section-heading"><div>
+            <p className="section-label">In their own words</p>
+            <h2>Personal video conversations</h2>
+          </div></div>
+          <div className="video-chat-grid">
+            {person.videos.map((video) => (
+              <VideoChatCard key={video.id} video={{ ...video, person }} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="section-block">
         <div className="section-heading">
           <div>
@@ -175,8 +196,8 @@ export default async function PersonPage({ params }: Props) {
           </div>
         </div>
         <div className="episode-list">
-          {person.podcasts.flatMap(({ podcast }) =>
-            podcast.episodes.map((episode) => (
+          {scopedEpisodes.flatMap(({ podcast, episodes }) =>
+            episodes.map((episode) => (
               <EpisodeCard
                 key={episode.id}
                 episode={episode}
