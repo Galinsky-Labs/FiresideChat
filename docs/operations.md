@@ -94,6 +94,14 @@ of complete online source availability. Importing all 7,349 remaining
 episodes via API would carry nontrivial costs; no metered audio is submitted
 until `TRANSCRIPTION_ENABLED=true` and `OPENAI_API_KEY` are configured.
 
+### Idempotent chunks, budget lock and backlog preview (FC-P12, FC-P13)
+
+- Every billed 15-minute chunk is written to `TranscriptionChunk` under a deterministic idempotency key (episode, audio URL, provider, model, boundaries) immediately after the provider responds. A restarted job reuses recorded chunks instead of paying again. The only remaining duplicate-billing window is a crash between the provider response and that write: at most one chunk per interruption, accepted as the documented safety trade-off.
+- The budget check and the episode claim run inside one transaction holding a PostgreSQL advisory lock, so parallel web workers, CLI runs and retries cannot jointly exceed `TRANSCRIPTION_DAILY_MAX_MINUTES` / `TRANSCRIPTION_MONTHLY_MAX_MINUTES`. Usage is the larger of attempted episode durations and billed chunk seconds plus in-flight estimates. Episodes left over are counted as `budgetBlocked`.
+- Candidates are ordered with a freshness lane (`TRANSCRIPTION_FRESHNESS_DAYS`, default 30) and a per-show round-robin over the historical backlog, oldest first.
+- `npm run transcription:plan` prints a read-only preview: episodes by state (complete, public source pending, queued for generation, attempted/failed, unavailable), backlog audio minutes, estimated cost at `TRANSCRIPTION_RATE_PER_MINUTE_USD` (default 0.006), days to completion at the caps, and the next fair batch. It bills nothing and works while generation is disabled.
+- Generation state is explicit: `DISABLED_BY_OPERATOR`, `MISSING_CREDENTIALS`, `BUDGET_EXHAUSTED` or `READY`.
+
 ## Health endpoints
 
 - `/api/health/live` — process liveness only; does not touch PostgreSQL.
