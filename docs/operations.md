@@ -67,6 +67,8 @@ Before a web-discovered transcript is imported it must match the episode (`src/l
 
 Every stored transcript passes `prepareTranscriptForStorage` (`src/lib/transcription/transcript-qa.ts`): text is Unicode-normalized without altering words; cues that are empty, negative, non-finite, end before they start or start beyond the episode are dropped (never re-timed); out-of-order cues are re-sorted; overlaps are reported. Generated transcripts never carry speaker names; publisher-supplied labels are kept. Publisher transcripts always outrank generated ones.
 
+Corrections (FC-P14): anyone can suggest a correction to one timestamped line from the episode page (`POST /api/transcript-corrections`: same-origin, bounded form, honeypot, at most 25 pending per episode). A request never edits the transcript. Editors decide at `/admin/corrections`; accepting updates the segment (and the matching text in `fullText`) and writes an immutable `TranscriptRevision` (previous text, new text, editor, note, evidence) in one transaction, guarded by a revision check and by the segment still reading exactly what the requester saw. Accepted revisions are listed publicly under the transcript. A later publisher re-import replaces segment text (source priority), but the revision history is kept.
+
 ## Generated transcription cost guard
 
 Generated transcription is disabled by default and needs an OpenAI API account
