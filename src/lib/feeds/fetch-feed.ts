@@ -4,7 +4,7 @@ import type { FeedFetchOptions, FeedFetchResult } from "./types";
 const DEFAULT_TIMEOUT_MS = 20_000;
 const DEFAULT_MAX_BYTES = 10 * 1024 * 1024;
 const DEFAULT_USER_AGENT =
-  "FiresideChat/0.1 (+https://github.com/neophilism/FiresideChat)";
+  "FiresideChat/0.1 (+https://github.com/Galinsky-Labs/FiresideChat)";
 const MAX_REDIRECTS = 5;
 
 export class FeedFetchError extends Error {

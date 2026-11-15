@@ -36,8 +36,9 @@ export function parseReviewCandidate(input:Record<string,unknown>) {
  const podcastId=reviewId(input.podcastId),feedUrl=reviewHttps(input.feedUrl);
  const publishedTitle=text(input.publishedTitle,3,200);
  const publishedWebsite=input.publishedWebsite?reviewHttps(input.publishedWebsite):null;
- const mode=input.mode;
- if(mode!=="DEDICATED"&&mode!=="SHARED")return fail("INVALID_REVIEW_MODE");
+ const raw=input.mode;
+ if(raw!=="DEDICATED"&&raw!=="SHARED")return fail("INVALID_REVIEW_MODE");
+ const mode:"DEDICATED"|"SHARED"=raw;
  return {podcastId,feedUrl,publishedTitle,publishedWebsite,mode};
 }
 export function parseHostEvidence(input:Record<string,unknown>) {

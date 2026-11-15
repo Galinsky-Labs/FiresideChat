@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readHostReviewForm } from '../src/lib/host-review-request.ts';
+import { readHostReviewForm } from '../src/lib/host-review-request';
 const url='https://portal.example/api/admin/host-reviews';
 const request=(body:BodyInit,headers:Record<string,string>={},signal?:AbortSignal)=>new Request(url,{method:'POST',body,headers:{'content-type':'application/x-www-form-urlencoded',...headers},...(signal?{signal}:{}),duplex:'half'} as RequestInit);
 const rejected=(fn:()=>Promise<unknown>,status:number)=>assert.rejects(fn,(error:unknown)=>error instanceof Error && 'status' in error && error.status===status && !error.message.includes('private'));
@@ -11,8 +11,7 @@ test('bounded URL-encoded and multipart forms support existing text-only submiss
  assert.deepEqual({...await readHostReviewForm(new Request(url,{method:'POST',body:form}))},{action:'amend',revision:'1'});
 });
 test('measured stream budget rejects missing or misleading content length',async()=>{
- const declarations: Record<string,string>[] = [{},{'content-length':'1'},{'content-length':'16385'}];
- for(const headers of declarations)
+ for(const headers of [{},{'content-length':'1'},{'content-length':'16385'}] as Record<string,string>[])
   await rejected(()=>readHostReviewForm(request('x='.padEnd(16385,'a'),headers)),413);
  for(const length of ['-1','garbage','9007199254740992']) await rejected(()=>readHostReviewForm(request('x=1',{'content-length':length})),400);
  await rejected(()=>readHostReviewForm(request('x=1',{'content-length':'2'})),400);

@@ -37,7 +37,7 @@ async function downloadAudio(url: string, target: string, maxBytes: number, time
   const response = await fetch(allowedAudioUrl(url), {
     headers: {
       "User-Agent": process.env.FEED_USER_AGENT ??
-        "FiresideChat/1.0 (+https://github.com/neophilism/FiresideChat)",
+        "FiresideChat/1.0 (+https://github.com/Galinsky-Labs/FiresideChat)",
     },
     redirect: "follow",
     signal: AbortSignal.timeout(timeoutMs),

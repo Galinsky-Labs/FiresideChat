@@ -7,6 +7,19 @@ datasource db {
   provider = "postgresql"
 }
 
+enum VideoFormat {
+  PERSONAL_CHAT
+  LIVESTREAM
+  Q_AND_A
+  BEHIND_THE_SCENES
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  INSTAGRAM
+  OTHER
+}
+
 enum PersonKind {
   HOUSE
   SENATE
@@ -61,20 +74,21 @@ model Person {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   podcasts     PodcastPerson[]
+  videos       VideoChat[]
 
   @@index([isCurrent])
   @@index([kind])
 }
 
 model Podcast {
-  id                    String           @id @default(cuid())
-  slug                  String           @unique
+  id                    String            @id @default(cuid())
+  slug                  String            @unique
   title                 String
-  rssUrl                String           @unique
+  rssUrl                String            @unique
   websiteUrl            String?
   description           String?
-  active                Boolean          @default(true)
-  publishingStatus      PublishingStatus @default(UNKNOWN)
+  active                Boolean           @default(true)
+  publishingStatus      PublishingStatus  @default(UNKNOWN)
   verificationUrl       String?
   verifiedAt            DateTime?
   verificationNote      String?
@@ -89,11 +103,11 @@ model Podcast {
   lastCheckedAt         DateTime?
   lastSuccessfulCheckAt DateTime?
   lastEpisodeAt         DateTime?
-  consecutiveFailures   Int              @default(0)
+  consecutiveFailures   Int               @default(0)
   nextRetryAt           DateTime?
   lastError             String?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
   feedScopes            FeedScopeRecord[]
   people                PodcastPerson[]
   episodes              Episode[]
@@ -108,43 +122,43 @@ model PodcastPerson {
   podcastId String
   personId  String
   role      PodcastRole
-  podcast   Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-  person    Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  podcast   Podcast     @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  person    Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@id([podcastId, personId, role])
   @@index([personId])
 }
 
 model Episode {
-  id               String           @id @default(cuid())
-  podcastId        String
-  sourceFeedUrl    String?
-  guid             String
-  title            String
-  description      String?
-  publishedAt      DateTime
-  sourceUpdatedAt  DateTime?
-  durationSeconds  Int?
-  audioUrl         String
-  audioMimeType    String?
-  episodeUrl       String?
-  imageUrl         String?
-  publisherTranscriptUrl      String?
-  publisherTranscriptMimeType String?
-  transcriptStatus          TranscriptStatus @default(MISSING)
-  transcriptionAttempts     Int              @default(0)
-  publisherTranscriptAttempts       Int       @default(0)
-  publisherTranscriptLastAttemptAt  DateTime?
-  publisherTranscriptLastError      String?
-  transcriptDiscoveryAttempts       Int       @default(0)
-  transcriptDiscoveryLastAttemptAt  DateTime?
-  transcriptDiscoveryLastError      String?
-  transcriptionLastAttemptAt DateTime?
-  transcriptionLastError    String?
-  createdAt                 DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  podcast          Podcast          @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-  transcript       Transcript?
+  id                               String           @id @default(cuid())
+  podcastId                        String
+  sourceFeedUrl                    String?
+  guid                             String
+  title                            String
+  description                      String?
+  publishedAt                      DateTime
+  sourceUpdatedAt                  DateTime?
+  durationSeconds                  Int?
+  audioUrl                         String
+  audioMimeType                    String?
+  episodeUrl                       String?
+  imageUrl                         String?
+  publisherTranscriptUrl           String?
+  publisherTranscriptMimeType      String?
+  transcriptStatus                 TranscriptStatus @default(MISSING)
+  transcriptionAttempts            Int              @default(0)
+  publisherTranscriptAttempts      Int              @default(0)
+  publisherTranscriptLastAttemptAt DateTime?
+  publisherTranscriptLastError     String?
+  transcriptDiscoveryAttempts      Int              @default(0)
+  transcriptDiscoveryLastAttemptAt DateTime?
+  transcriptDiscoveryLastError     String?
+  transcriptionLastAttemptAt       DateTime?
+  transcriptionLastError           String?
+  createdAt                        DateTime         @default(now())
+  updatedAt                        DateTime         @updatedAt
+  podcast                          Podcast          @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  transcript                       Transcript?
 
   @@unique([podcastId, guid])
   @@index([publishedAt])
@@ -196,7 +210,6 @@ model IngestionRun {
   @@index([status])
 }
 
-
 enum InquiryEmailStatus {
   PENDING
   SENDING
@@ -232,11 +245,13 @@ enum FeedScopeMode {
   DEDICATED
   SHARED
 }
+
 enum FeedScopeReview {
   PENDING
   APPROVED
   REJECTED
 }
+
 enum FeedScopeEvent {
   SUBMITTED
   EPISODE_EVIDENCE_ADDED
@@ -245,22 +260,23 @@ enum FeedScopeEvent {
   REJECTED
   ACTIVATED
 }
+
 model FeedScopeRecord {
-  id               String            @id @default(cuid())
+  id               String             @id @default(cuid())
   podcastId        String
   feedUrl          String
   publishedTitle   String
   publishedWebsite String?
   mode             FeedScopeMode
-  status           FeedScopeReview   @default(PENDING)
+  status           FeedScopeReview    @default(PENDING)
   reviewSourceUrl  String?
   reviewNote       String?
   reviewerRef      String?
-  reviewedOn       DateTime?         @db.Date
-  revision         Int               @default(0)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  podcast          Podcast          @relation(fields: [podcastId], references: [id], onDelete: Restrict)
+  reviewedOn       DateTime?          @db.Date
+  revision         Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  podcast          Podcast            @relation(fields: [podcastId], references: [id], onDelete: Restrict)
   hosts            FeedScopeHost[]
   episodes         FeedScopeEpisode[]
   audit            FeedScopeAudit[]
@@ -268,39 +284,155 @@ model FeedScopeRecord {
   @@unique([podcastId, feedUrl])
   @@index([status, createdAt])
 }
+
 model FeedScopeHost {
-  id           String          @id @default(cuid())
-  scopeId      String
-  personId     String
-  role         PodcastRole
-  fromOn       DateTime        @db.Date
-  toOn         DateTime?       @db.Date
-  sourceUrl    String
-  observedOn   DateTime        @db.Date
-  scope        FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
+  id         String          @id @default(cuid())
+  scopeId    String
+  personId   String
+  role       PodcastRole
+  fromOn     DateTime        @db.Date
+  toOn       DateTime?       @db.Date
+  sourceUrl  String
+  observedOn DateTime        @db.Date
+  scope      FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
 
   @@unique([scopeId, personId, role, fromOn])
   @@index([scopeId, personId])
 }
+
 model FeedScopeEpisode {
-  id           String          @id @default(cuid())
-  scopeId      String
-  guid         String
-  sourceUrl    String
-  observedOn   DateTime        @db.Date
-  scope        FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
+  id         String          @id @default(cuid())
+  scopeId    String
+  guid       String
+  sourceUrl  String
+  observedOn DateTime        @db.Date
+  scope      FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
 
   @@unique([scopeId, guid])
 }
+
 model FeedScopeAudit {
-  id           String          @id @default(cuid())
-  scopeId      String
-  revision     Int
-  actorRef     String
-  event        FeedScopeEvent
-  note         String
-  createdAt    DateTime        @default(now())
-  scope        FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
+  id        String          @id @default(cuid())
+  scopeId   String
+  revision  Int
+  actorRef  String
+  event     FeedScopeEvent
+  note      String
+  createdAt DateTime        @default(now())
+  scope     FeedScopeRecord @relation(fields: [scopeId], references: [id], onDelete: Restrict)
 
   @@unique([scopeId, revision])
+}
+
+enum HostReviewRole {
+  HOST
+  COHOST
+  OFFICIAL_PRODUCER
+  GUEST
+  UNKNOWN
+}
+
+enum HostReviewEvidenceKind {
+  HOST_CREDIT
+  COHOST_CREDIT
+  OFFICIAL_PRODUCTION
+  NETWORK_ONLY
+  GUEST_APPEARANCE
+  OTHER
+}
+
+enum HostReviewStatus {
+  PENDING
+  NEEDS_EVIDENCE
+  VERIFIED
+  EXCLUDED_GUEST
+  REJECTED
+}
+
+enum HostReviewAction {
+  SUBMITTED
+  EVIDENCE_ADDED
+  CLAIM_AMENDED
+  VERIFIED
+  EXCLUDED_GUEST
+  NEEDS_EVIDENCE
+  REJECTED
+}
+
+model HostReviewCandidate {
+  id                String               @id @default(cuid())
+  identityKey       String               @unique
+  officialKey       String
+  officialName      String
+  identitySourceUrl String
+  showKey           String
+  showTitle         String
+  proposedRole      HostReviewRole
+  feedCandidateUrl  String?
+  hostStartOn       DateTime?            @db.Date
+  hostEndOn         DateTime?            @db.Date
+  status            HostReviewStatus     @default(PENDING)
+  revision          Int                  @default(0)
+  reviewNote        String?
+  reviewerRef       String?
+  reviewedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  evidence          HostReviewEvidence[]
+  audit             HostReviewAudit[]
+
+  @@index([status, createdAt])
+  @@index([officialKey, showKey])
+}
+
+model HostReviewEvidence {
+  id          String                 @id @default(cuid())
+  candidateId String
+  kind        HostReviewEvidenceKind
+  sourceUrl   String
+  excerpt     String
+  observedOn  DateTime               @db.Date
+  createdAt   DateTime               @default(now())
+  candidate   HostReviewCandidate    @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+
+  @@unique([candidateId, kind, sourceUrl, observedOn])
+  @@index([candidateId, createdAt])
+}
+
+model HostReviewAudit {
+  id          String              @id @default(cuid())
+  candidateId String
+  action      HostReviewAction
+  revision    Int
+  actorRef    String
+  note        String
+  createdAt   DateTime            @default(now())
+  candidate   HostReviewCandidate @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+
+  @@unique([candidateId, revision])
+}
+
+model VideoChat {
+  id               String        @id @default(cuid())
+  personId         String
+  person           Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  platform         VideoPlatform
+  format           VideoFormat
+  platformVideoId  String
+  sourceUrl        String        @unique
+  verificationUrl  String
+  verificationNote String
+  verifiedAt       DateTime
+  publisherName    String
+  publishedAt      DateTime
+  transcriptText   String?
+  active           Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@unique([platform, platformVideoId])
+  @@index([personId, publishedAt])
+  @@index([active, publishedAt])
 }

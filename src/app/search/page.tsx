@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EpisodeCard } from "@/components/episode-card";
+import { VideoChatCard } from "@/components/video-chat-card";
 import { IllustratedPortrait } from "@/components/illustrated-portrait";
 import { db } from "@/lib/db";
 import { feedAttributionForPodcast } from "@/lib/feed-scope-store";
@@ -62,7 +63,7 @@ export default async function SearchPage({ searchParams }: Props) {
   }
 
   const publicEpisodeWhere=await archiveVisibleWhere();
-  const [people, podcasts, episodes, transcriptSegments, plainTranscripts] =
+  const [people, podcasts, episodes, transcriptSegments, plainTranscripts, videos] =
     await Promise.all([
     db.person.findMany({
       where: { fullName: { contains: q, mode: "insensitive" } },
@@ -128,6 +129,20 @@ export default async function SearchPage({ searchParams }: Props) {
       },
       orderBy: { episode: { publishedAt: "desc" } },
       take: 20,
+    }),
+    db.videoChat.findMany({
+      where: {
+        active: true,
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { transcriptText: { contains: q, mode: "insensitive" } },
+          { person: { fullName: { contains: q, mode: "insensitive" } } },
+        ],
+      },
+      include: { person: true },
+      orderBy: { publishedAt: "desc" },
+      take: 40,
     }),
   ]);
 
@@ -208,6 +223,16 @@ export default async function SearchPage({ searchParams }: Props) {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading"><div>
+          <p className="section-label">Personal conversations</p>
+          <h2>{videos.length} video matches</h2>
+        </div></div>
+        <div className="video-chat-grid">
+          {videos.map((video) => <VideoChatCard key={video.id} video={video} />)}
         </div>
       </section>
 
