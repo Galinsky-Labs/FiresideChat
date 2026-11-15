@@ -193,7 +193,7 @@ export async function fetchPublisherTranscript(
       "User-Agent":
         options.userAgent ??
         process.env.FEED_USER_AGENT ??
-        "FiresideChat/1.0 (+https://github.com/neophilism/FiresideChat)",
+        "FiresideChat/1.0 (+https://github.com/Galinsky-Labs/FiresideChat)",
     },
     redirect: "follow",
     signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
