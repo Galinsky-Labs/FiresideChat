@@ -55,6 +55,12 @@ Episode websites are inspected for explicit transcript links or transcript
 sections only; search indexes and platform captions behind authentication are
 not harvested. Successful imports are stored locally for fast full-text search.
 
+### Discovery matching and transcript QA (FC-P11, FC-P14)
+
+Before a web-discovered transcript is imported it must match the episode (`src/lib/transcription/transcript-match.ts`): empty, too-short (< 50 words), paywall/login pages, re-published show notes, off-site scripts that do not name the episode, and timed captions whose length cannot fit the episode are rejected. A negative search is terminal until reset and records `transcriptDiscoveryLastError` (`NO_TRANSCRIPT_FOUND` or `NO_MATCHING_TRANSCRIPT: rejected …`) together with `transcriptDiscoveryLastAttemptAt`.
+
+Every stored transcript passes `prepareTranscriptForStorage` (`src/lib/transcription/transcript-qa.ts`): text is Unicode-normalized without altering words; cues that are empty, negative, non-finite, end before they start or start beyond the episode are dropped (never re-timed); out-of-order cues are re-sorted; overlaps are reported. Generated transcripts never carry speaker names; publisher-supplied labels are kept. Publisher transcripts always outrank generated ones.
+
 ## Generated transcription cost guard
 
 Generated transcription is disabled by default and needs an OpenAI API account

@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { fetchPublisherTranscript } from "@/lib/feeds/publisher-transcript";
 import type { ParsedPublisherTranscript } from "@/lib/feeds/publisher-transcript";
-import { discoverEpisodePageTranscript } from "./episode-page-discovery";
+import { discoverEpisodePageTranscriptDetailed } from "./episode-page-discovery";
+import { prepareTranscriptForStorage } from "./transcript-qa";
 
 const MAX_ERROR_LENGTH = 1_500;
 const DEFAULT_PUBLISHER_LIMIT = 80;
@@ -26,7 +27,11 @@ async function saveExternalTranscript(
   episodeId: string,
   result: ParsedPublisherTranscript,
   discoveredFrom?: { url: string; mimeType: string | null },
+  durationSeconds?: number | null,
 ) {
+  // FC-P14: drop structurally invalid segments and refuse empty transcripts.
+  const prepared = prepareTranscriptForStorage(result, "PUBLISHER", durationSeconds);
+  result = { fullText: prepared.fullText, segments: prepared.segments };
   await db.$transaction(async (tx) => {
     const episode = await tx.episode.findUnique({
       where: { id: episodeId },
@@ -141,7 +146,7 @@ export async function backfillExternalTranscripts(options: {
         url: episode.publisherTranscriptUrl,
         mimeType: episode.publisherTranscriptMimeType,
       });
-      await saveExternalTranscript(episode.id, parsed);
+      await saveExternalTranscript(episode.id, parsed, undefined, episode.durationSeconds);
       result.publisher.recovered += 1;
     } catch (error) {
       result.publisher.failed += 1;
@@ -198,20 +203,32 @@ export async function backfillExternalTranscripts(options: {
     if (claimed.count !== 1) { result.discovery.skipped += 1; return; }
     try {
       if (!episode.episodeUrl) return;
-      const found = await discoverEpisodePageTranscript(episode.episodeUrl);
+      const { found, rejections } = await discoverEpisodePageTranscriptDetailed(episode.episodeUrl, {
+        title: episode.title,
+        description: episode.description,
+        durationSeconds: episode.durationSeconds,
+        episodeUrl: episode.episodeUrl,
+      });
       if (!found) {
         // A successful negative discovery is terminal until an editor resets this
         // field; do not repeatedly crawl the same page on every maintenance run.
+        // FC-P11: record what was searched and why candidates were refused.
+        const reasons = [...new Set(rejections)];
         await db.episode.update({
           where: { id: episode.id },
-          data: { transcriptDiscoveryAttempts: maxAttempts },
+          data: {
+            transcriptDiscoveryAttempts: maxAttempts,
+            transcriptDiscoveryLastError: reasons.length
+              ? "NO_MATCHING_TRANSCRIPT: rejected " + reasons.join(", ")
+              : "NO_TRANSCRIPT_FOUND",
+          },
         });
         result.discovery.missed += 1;
         return;
       }
       await saveExternalTranscript(episode.id, found.transcript, {
         url: found.url, mimeType: found.mimeType,
-      });
+      }, episode.durationSeconds);
       result.discovery.recovered += 1;
     } catch (error) {
       const message = errorMessage(error);
