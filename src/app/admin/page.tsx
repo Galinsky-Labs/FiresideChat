@@ -151,6 +151,7 @@ export default async function AdminPage() {
           <Link href="/admin/feed-scopes">Review historical feed identities and source scope →</Link>
           <Link href="/admin/host-reviews">Inspect host verification evidence →</Link>
             <Link href="/admin/queues">Open every editorial and operations queue →</Link>
+            <Link href="/admin/corrections">Review transcript correction requests →</Link>
         </div>
       </section>
 

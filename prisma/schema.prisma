@@ -130,7 +130,7 @@ model PodcastPerson {
 }
 
 model Episode {
-  id                               String               @id @default(cuid())
+  id                               String                        @id @default(cuid())
   podcastId                        String
   sourceFeedUrl                    String?
   guid                             String
@@ -145,20 +145,21 @@ model Episode {
   imageUrl                         String?
   publisherTranscriptUrl           String?
   publisherTranscriptMimeType      String?
-  transcriptStatus                 TranscriptStatus     @default(MISSING)
-  transcriptionAttempts            Int                  @default(0)
-  publisherTranscriptAttempts      Int                  @default(0)
+  transcriptStatus                 TranscriptStatus              @default(MISSING)
+  transcriptionAttempts            Int                           @default(0)
+  publisherTranscriptAttempts      Int                           @default(0)
   publisherTranscriptLastAttemptAt DateTime?
   publisherTranscriptLastError     String?
-  transcriptDiscoveryAttempts      Int                  @default(0)
+  transcriptDiscoveryAttempts      Int                           @default(0)
   transcriptDiscoveryLastAttemptAt DateTime?
   transcriptDiscoveryLastError     String?
   transcriptionLastAttemptAt       DateTime?
   transcriptionLastError           String?
-  createdAt                        DateTime             @default(now())
-  updatedAt                        DateTime             @updatedAt
-  podcast                          Podcast              @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  createdAt                        DateTime                      @default(now())
+  updatedAt                        DateTime                      @updatedAt
+  podcast                          Podcast                       @relation(fields: [podcastId], references: [id], onDelete: Cascade)
   transcript                       Transcript?
+  correctionRequests               TranscriptCorrectionRequest[]
   transcriptionChunks              TranscriptionChunk[]
 
   @@unique([podcastId, guid])
@@ -169,15 +170,16 @@ model Episode {
 }
 
 model Transcript {
-  id        String              @id @default(cuid())
-  episodeId String              @unique
+  id        String               @id @default(cuid())
+  episodeId String               @unique
   source    TranscriptSource
-  language  String              @default("en")
+  language  String               @default("en")
   fullText  String
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
-  episode   Episode             @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  episode   Episode              @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   segments  TranscriptSegment[]
+  revisions TranscriptRevision[]
 }
 
 model TranscriptSegment {
@@ -471,4 +473,52 @@ model OpsAction {
   createdAt      DateTime @default(now())
 
   @@index([createdAt])
+}
+
+enum CorrectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+/// FC-P14: a public request to correct one timestamped segment. A request never
+/// changes the transcript; only an authenticated editor decision can.
+model TranscriptCorrectionRequest {
+  id           String           @id @default(cuid())
+  episodeId    String
+  segmentId    String
+  startSeconds Float
+  originalText String
+  proposedText String
+  reason       String
+  evidenceUrl  String?
+  status       CorrectionStatus @default(PENDING)
+  revision     Int              @default(0)
+  reviewNote   String?
+  reviewerRef  String?
+  reviewedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  episode      Episode          @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([episodeId, status])
+}
+
+/// FC-P14: immutable editor revision history. Segment IDs are stored as plain
+/// values so the history survives a publisher re-import of the segments.
+model TranscriptRevision {
+  id                  String     @id @default(cuid())
+  transcriptId        String
+  segmentId           String
+  startSeconds        Float
+  previousText        String
+  newText             String
+  correctionRequestId String     @unique
+  actorRef            String
+  evidenceUrl         String?
+  note                String
+  createdAt           DateTime   @default(now())
+  transcript          Transcript @relation(fields: [transcriptId], references: [id], onDelete: Cascade)
+
+  @@index([transcriptId, startSeconds])
 }

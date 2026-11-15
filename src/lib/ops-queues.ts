@@ -17,7 +17,8 @@ export type OpsQueueKey =
   | "transcriptFailures"
   | "brokenSourceLinks"
   | "missingPortraits"
-  | "videoCandidatesPending";
+  | "videoCandidatesPending"
+  | "transcriptCorrections";
 
 export type OpsQueueCounts = Record<OpsQueueKey, number>;
 export type OpsQueue = {
@@ -42,6 +43,7 @@ const META: Record<OpsQueueKey, { label: string; action: boolean; explanation: s
   brokenSourceLinks: { label: "Broken source links", action: true, explanation: "Publisher transcript URLs that returned an error on the last attempt." },
   missingPortraits: { label: "Missing portraits", action: false, explanation: "Public servants without an approved portrait." },
   videoCandidatesPending: { label: "Video candidates pending", action: true, explanation: "Discovered video conversations staged inactive for editorial approval." },
+  transcriptCorrections: { label: "Transcript correction requests", action: true, explanation: "Public correction proposals awaiting an editor decision (FC-P14); transcripts are unchanged until accepted." },
 };
 
 export const OPS_QUEUE_ORDER = Object.keys(META) as OpsQueueKey[];

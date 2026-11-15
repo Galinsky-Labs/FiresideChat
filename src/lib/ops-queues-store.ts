@@ -22,7 +22,7 @@ export async function readOpsQueues(now = new Date()) {
   const [
     unreviewedHosts, unverifiedShowMapping, crawlErrors, staleFeeds, neverSyncedFeeds,
     publisherTranscriptPending, webTranscriptPending, generatedBlocked, transcriptFailures,
-    brokenSourceLinks, people, videoCandidatesPending, day, month,
+    brokenSourceLinks, people, videoCandidatesPending, day, month, transcriptCorrections,
   ] = await Promise.all([
     db.hostReviewCandidate.count({ where: { status: { in: ["PENDING", "NEEDS_EVIDENCE"] } } }),
     db.feedScopeRecord.count({ where: { status: "PENDING" } }),
@@ -42,6 +42,7 @@ export async function readOpsQueues(now = new Date()) {
     db.videoChat.count({ where: { active: false } }),
     usageSince(db, startOfDay, staleProcessing),
     usageSince(db, startOfMonth, staleProcessing),
+    db.transcriptCorrectionRequest.count({ where: { status: "PENDING" } }),
   ]);
 
   const counts: OpsQueueCounts = {
@@ -51,6 +52,7 @@ export async function readOpsQueues(now = new Date()) {
     publisherTranscriptPending, webTranscriptPending, generatedBlocked, transcriptFailures, brokenSourceLinks,
     missingPortraits: people.filter((p) => !p.portraitUrl && !portraitUrlForSlug(p.slug)).length,
     videoCandidatesPending,
+    transcriptCorrections,
   };
   const generation = generatedTranscriptionState({
     enabled: process.env.TRANSCRIPTION_ENABLED === "true",

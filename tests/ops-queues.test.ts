@@ -8,7 +8,7 @@ const zero = Object.fromEntries(OPS_QUEUE_ORDER.map((k) => [k, 0])) as OpsQueueC
 
 test("FC-P17 every required queue is separate and classified", () => {
   const queues = buildOpsQueues({ ...zero, unreviewedHosts: 3, staleFeeds: 2, generatedBlocked: 40 }, "DISABLED_BY_OPERATOR");
-  assert.equal(queues.length, 13);
+  assert.equal(queues.length, 14);
   for (const key of ["unreviewedHosts", "unresolvedShowCandidates", "crawlErrors", "staleFeeds", "unverifiedShowMapping",
     "publisherTranscriptPending", "webTranscriptPending", "generatedBlocked", "transcriptFailures", "brokenSourceLinks", "missingPortraits"])
     assert.ok(queues.some((q) => q.key === key), key);
@@ -17,7 +17,7 @@ test("FC-P17 every required queue is separate and classified", () => {
   assert.equal(byKey.get("staleFeeds")?.severity, "watch");
   assert.equal(byKey.get("crawlErrors")?.severity, "clear");
   assert.match(byKey.get("generatedBlocked")!.explanation, /DISABLED_BY_OPERATOR/);
-  assert.deepEqual(summarizeQueues(queues), { actionNeeded: 3, watching: 42, clearQueues: 10 });
+  assert.deepEqual(summarizeQueues(queues), { actionNeeded: 3, watching: 42, clearQueues: 11 });
 });
 
 test("FC-P17 operator actions validate input and derive deterministic idempotency keys", () => {
