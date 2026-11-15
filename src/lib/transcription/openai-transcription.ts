@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { withTranscriptionChunks } from "./ffmpeg-audio";
+import { chunkIdempotencyKey, memoryLedger, transcribeChunksIdempotently } from "./chunk-ledger";
+import type { ChunkLedger, ChunkTranscript } from "./chunk-ledger";
 
 const OPENAI_TRANSCRIPT_URL = "https://api.openai.com/v1/audio/transcriptions";
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -65,6 +67,32 @@ export function normalizeOpenAITranscript(
   };
 }
 
+export const OPENAI_PROVIDER = "openai";
+
+async function transcribeChunkWithOpenAI(path: string, options: {
+  apiKey: string; model: string; timeoutMs?: number;
+}): Promise<ChunkTranscript> {
+  const source = await readFile(path);
+  const form = new FormData();
+  form.append("file", new Blob([new Uint8Array(source)], { type: "audio/mpeg" }), "podcast-segment.mp3");
+  form.append("model", options.model);
+  form.append("response_format", "verbose_json");
+  form.append("timestamp_granularities[]", "segment");
+  const response = await fetch(OPENAI_TRANSCRIPT_URL, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + options.apiKey },
+    body: form,
+    signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    const errorBody = (await response.text()).slice(0, 1_000);
+    throw new Error("Transcription provider returned HTTP " + response.status + ": " + errorBody);
+  }
+  const parsed = normalizeOpenAITranscript(
+    (await response.json()) as OpenAITranscriptResponse);
+  return { text: parsed.fullText, language: parsed.language, segments: parsed.segments };
+}
+
 export async function transcribeAudioWithOpenAI(options: {
   audioUrl: string;
   audioMimeType: string | null;
@@ -73,45 +101,27 @@ export async function transcribeAudioWithOpenAI(options: {
   maxBytes?: number;
   timeoutMs?: number;
   userAgent?: string;
+  /** FC-P12: reuse already-billed chunks after an interruption. */
+  episodeId?: string;
+  ledger?: ChunkLedger;
 }): Promise<GeneratedTranscript> {
+  const model = options.model ?? "whisper-1";
+  const ledger = options.ledger ?? memoryLedger();
   // OpenAI's audio transcription endpoint has a 25 MiB upload ceiling.
   // Lossy 32kbps, mono, 15-minute chunks stay well below that limit,
   // even when the original episode is hundreds of megabytes.
   return withTranscriptionChunks(options.audioUrl, {
     maxBytes: options.maxBytes ?? 350 * 1024 * 1024,
   }, async (chunks) => {
-    const textParts: string[] = [];
-    const segments: GeneratedTranscript["segments"] = [];
-    let language: string | null = null;
-    for (const chunk of chunks) {
-      const source = await readFile(chunk.path);
-      const form = new FormData();
-      form.append("file", new Blob([new Uint8Array(source)], { type: "audio/mpeg" }), "podcast-segment.mp3");
-      form.append("model", options.model ?? "whisper-1");
-      form.append("response_format", "verbose_json");
-      form.append("timestamp_granularities[]", "segment");
-      const response = await fetch(OPENAI_TRANSCRIPT_URL, {
-        method: "POST",
-        headers: { Authorization: "Bearer " + options.apiKey },
-        body: form,
-        signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
-      });
-      if (!response.ok) {
-        const errorBody = (await response.text()).slice(0, 1_000);
-        throw new Error("Transcription provider returned HTTP " + response.status + ": " + errorBody);
-      }
-      const parsed = normalizeOpenAITranscript(
-        (await response.json()) as OpenAITranscriptResponse);
-      textParts.push(parsed.fullText);
-      language ??= parsed.language;
-      for (const segment of parsed.segments) {
-        segments.push({
-          startSeconds: segment.startSeconds + chunk.startSeconds,
-          endSeconds: segment.endSeconds + chunk.startSeconds,
-          text: segment.text,
-        });
-      }
-    }
-    return { fullText: textParts.join("\n\n"), language, segments };
+    const { transcript } = await transcribeChunksIdempotently(
+      chunks,
+      (chunk) => chunkIdempotencyKey({
+        episodeId: options.episodeId ?? "", audioUrl: options.audioUrl,
+        provider: OPENAI_PROVIDER, model, chunk,
+      }),
+      ledger,
+      (chunk) => transcribeChunkWithOpenAI(chunk.path, { apiKey: options.apiKey, model, timeoutMs: options.timeoutMs }),
+    );
+    return transcript;
   });
 }

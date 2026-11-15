@@ -130,7 +130,7 @@ model PodcastPerson {
 }
 
 model Episode {
-  id                               String           @id @default(cuid())
+  id                               String               @id @default(cuid())
   podcastId                        String
   sourceFeedUrl                    String?
   guid                             String
@@ -145,20 +145,21 @@ model Episode {
   imageUrl                         String?
   publisherTranscriptUrl           String?
   publisherTranscriptMimeType      String?
-  transcriptStatus                 TranscriptStatus @default(MISSING)
-  transcriptionAttempts            Int              @default(0)
-  publisherTranscriptAttempts      Int              @default(0)
+  transcriptStatus                 TranscriptStatus     @default(MISSING)
+  transcriptionAttempts            Int                  @default(0)
+  publisherTranscriptAttempts      Int                  @default(0)
   publisherTranscriptLastAttemptAt DateTime?
   publisherTranscriptLastError     String?
-  transcriptDiscoveryAttempts      Int              @default(0)
+  transcriptDiscoveryAttempts      Int                  @default(0)
   transcriptDiscoveryLastAttemptAt DateTime?
   transcriptDiscoveryLastError     String?
   transcriptionLastAttemptAt       DateTime?
   transcriptionLastError           String?
-  createdAt                        DateTime         @default(now())
-  updatedAt                        DateTime         @updatedAt
-  podcast                          Podcast          @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  createdAt                        DateTime             @default(now())
+  updatedAt                        DateTime             @updatedAt
+  podcast                          Podcast              @relation(fields: [podcastId], references: [id], onDelete: Cascade)
   transcript                       Transcript?
+  transcriptionChunks              TranscriptionChunk[]
 
   @@unique([podcastId, guid])
   @@index([publishedAt])
@@ -435,4 +436,25 @@ model VideoChat {
   @@unique([platform, platformVideoId])
   @@index([personId, publishedAt])
   @@index([active, publishedAt])
+}
+
+/// FC-P12: one billed speech-to-text chunk. The unique idempotency key makes an
+/// interrupted job reuse already-paid chunks instead of billing them again.
+model TranscriptionChunk {
+  id             String   @id @default(cuid())
+  episodeId      String
+  idempotencyKey String   @unique
+  provider       String
+  model          String
+  startSeconds   Float
+  endSeconds     Float
+  billedSeconds  Float
+  language       String?
+  text           String
+  segments       Json
+  createdAt      DateTime @default(now())
+  episode        Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([episodeId, startSeconds])
+  @@index([createdAt])
 }
