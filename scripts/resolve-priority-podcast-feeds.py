@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import time
+from priority_feed_review import classify_directory_result
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -41,16 +42,27 @@ def main():
                 "User-Agent": "FiresideChat-HistoricalPodcastLookup/1.0",
                 "Accept": "application/json"})
             with urlopen(req, timeout=25) as response:
-                results = json.loads(response.read().decode("utf-8")).get("results", [])
-            show = next((x for x in results if str(x.get("trackId")) == str(app_id)), None)
+                raw = response.read(1024 * 1024 + 1)
+                if len(raw) > 1024 * 1024:
+                    raise ValueError("directory response exceeds 1 MiB")
+                payload = json.loads(raw.decode("utf-8"))
+                if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+                    raise ValueError("invalid directory response")
+                results = payload["results"]
+            show = next((x for x in results if type(x) is dict and type(x.get("trackId")) is int and x["trackId"] == app_id), None)
             if show:
+                classification = classify_directory_result(app_id, show)
+                if classification["status"] in {"UNSAFE_FEED_URL", "UNSAFE_DIRECTORY_URL", "ID_MISMATCH"}:
+                    row["status"] = classification["status"]
+                    rows.append(row)
+                    print(json.dumps(row, ensure_ascii=False), flush=True)
+                    continue
                 row.update({
                     "found_title": show.get("collectionName", "") or "",
                     "found_publisher": show.get("artistName", "") or "",
                     "rss_url": show.get("feedUrl", "") or "",
                     "directory_url": show.get("trackViewUrl", "") or "",
-                    "status": "FEED_FOUND_REQUIRES_HOST_AND_RSS_REVIEW"
-                    if show.get("feedUrl") else "NO_PUBLIC_RSS_IN_DIRECTORY",
+                    "status": classification["status"],
                 })
             else:
                 row["status"] = "NO_DIRECTORY_ENTRY"
