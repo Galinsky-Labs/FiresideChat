@@ -458,3 +458,17 @@ model TranscriptionChunk {
   @@index([episodeId, startSeconds])
   @@index([createdAt])
 }
+
+/// FC-P17: audit trail for operator retry actions. The unique idempotency key
+/// makes a double-submitted form a no-op.
+model OpsAction {
+  id             String   @id @default(cuid())
+  idempotencyKey String   @unique
+  action         String
+  targetId       String
+  actorRef       String
+  affected       Int
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+}

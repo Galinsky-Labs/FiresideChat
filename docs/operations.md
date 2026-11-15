@@ -127,6 +127,8 @@ ADMIN_SESSION_SECRET=...
 
 The session secret should be a long random value independent of the login password. The dashboard shows feed failures, staleness, retry state, transcript coverage, generated-transcription failures, and recent ingestion runs.
 
+`/admin/queues` (FC-P17) lists every editorial/operations queue separately: unreviewed hosts, unverified show mapping, unresolved show candidates, crawl errors, outdated and never-synced feeds, publisher and web transcript pending, generated STT blocked (with the explicit generation state), transcript failures, broken source links, missing portraits and pending video candidates. `GET /api/admin/queues` returns the same counts as JSON. Two operator retries are available — re-open negative web transcript searches for a show, and clear a feed's retry backoff — each carrying a one-time nonce: a double submit is a no-op, and every applied action is recorded in `OpsAction`. Shows still enter the public archive only through the evidence-based host review (FC-P04) and feed scope review (FC-P05).
+
 ## Command-line status
 
 For a machine-readable production snapshot:
